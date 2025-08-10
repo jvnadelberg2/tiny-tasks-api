@@ -9,7 +9,7 @@ Designed to showcase **clean project hygiene**, and **working tests** in a small
 [API Reference](docs/API.md) • [OpenAPI (YAML)](openapi.yaml) • [Pretty API Docs (Redoc)](docs/site/openapi.html) • [Architecture](docs/ARCHITECTURE.md) • [CI Status](https://github.com/jvnadelberg2/tiny-tasks-api/actions)
 
 ---
-
+ 
 ## Features
 - Minimal **task** API: `GET/POST /tasks`, `GET/DELETE /tasks/{id}`, `GET /health`
 - **No external deps** (pure Node `http`)
