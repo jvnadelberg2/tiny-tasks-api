@@ -9,7 +9,7 @@ A minimal Node.js REST API with built-in, styled API documentation. Designed as 
 ## Quick Start
 Clone the repo and install dependencies:
 ```bash
-git clone https://github.com/YOUR-USERNAME/tiny-tasks-api.git
+git clone https://github.com/jvnadelberg2/tiny-tasks-api.git
 cd tiny-tasks-api
 npm install
 ```
