@@ -1,24 +1,60 @@
 # Tiny Tasks API
 
-[![CI](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml/badge.svg)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml)
+A minimal Node.js REST API with built-in, styled API documentation. Designed as a clean, self-contained portfolio example to demonstrate: Pure Node.js HTTP server (no frameworks), API endpoints with JSON responses, OpenAPI 3.0.3 specification (`openapi.yaml`), and Redoc rendering served directly by the app.
 
-A tiny, dependency-free REST API built with **Node.js core modules only**.  
-Designed to showcase **clean project hygiene**, and **working tests** in a small, interview-ready repo.
+## Requirements
+- Node.js v18 or newer (developed on v22)
+- npm (comes with Node.js)
 
-**Quick links:**  
-[API Reference](docs/API.md) • [OpenAPI (YAML)](openapi.yaml) • [Pretty API Docs (Redoc)](docs/site/openapi.html) • [Architecture](docs/ARCHITECTURE.md) • [CI Status](https://github.com/jvnadelberg2/tiny-tasks-api/actions)
+## Quick Start
+Clone the repo and install dependencies:
+```bash
+git clone https://github.com/YOUR-USERNAME/tiny-tasks-api.git
+cd tiny-tasks-api
+npm install
+```
 
----
- 
-## Features
-- Minimal **task** API: `GET/POST /tasks`, `GET/DELETE /tasks/{id}`, `GET /health`
-- **No external deps** (pure Node `http`)
-- **OpenAPI 3.0** spec + **Redoc** HTML viewer
-- **Tests** via Node’s built-in `node:test`
-- **Docs** for API, architecture, ops, security, troubleshooting
-- **GitHub hygiene**: CI, CODEOWNERS, PR/issue templates
-
-## Run locally
+Start the server:
 ```bash
 npm start
-# -> Tiny Tasks API listening on http://localhost:3000
+```
+
+You’ll see output similar to:
+```
+Server running at http://localhost:3000
+Docs:   http://localhost:3000/docs
+Health: http://localhost:3000/health
+Tasks:  http://localhost:3000/tasks
+```
+
+## View the API
+- Docs (Redoc UI): http://localhost:3000/docs — Full, styled API reference generated from `openapi.yaml`.
+- Health endpoint: http://localhost:3000/health — Returns `{ "status": "ok" }`.
+- Tasks endpoint: http://localhost:3000/tasks — Returns a demo list of tasks.
+- Raw OpenAPI spec: http://localhost:3000/openapi.yaml
+
+## Endpoints Overview
+### GET /health
+Check API liveness.
+
+**Response**
+```json
+{ "status": "ok" }
+```
+
+### GET /tasks
+List demo tasks.
+
+**Response**
+```json
+[
+  { "id": 1, "title": "First Task", "completed": false },
+  { "id": 2, "title": "Second Task", "completed": true }
+]
+```
+
+## OpenAPI Documentation
+The API is documented in `openapi.yaml` using OpenAPI 3.0.3. It’s rendered automatically via Redoc at `/docs` when the server is running.
+
+## License
+Licensed under the MIT License — see the LICENSE file for details.
