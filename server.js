@@ -1,3 +1,4 @@
+// server.js
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -45,4 +46,30 @@ export function createServer() {
 
       // Tasks
       if (req.url === '/tasks' && req.method === 'GET') {
-        res.writeHead(
+        res.writeHead(200, { 'content-type': 'application/json' });
+        res.end(JSON.stringify(tasks));
+        return;
+      }
+
+      // Not found
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Not Found' }));
+    } catch (err) {
+      console.error(err);
+      res.writeHead(500, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Internal Server Error' }));
+    }
+  });
+}
+
+// Only start when run directly (not during tests)
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const port = process.env.PORT || 3000;
+  createServer().listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+    console.log(`Docs:   http://localhost:${port}/docs`);
+    console.log(`Health: http://localhost:${port}/health`);
+    console.log(`Tasks:  http://localhost:${port}/tasks`);
+  });
+}
+
