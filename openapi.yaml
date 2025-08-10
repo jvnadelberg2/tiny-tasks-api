@@ -2,37 +2,107 @@ openapi: 3.0.3
 info:
   title: Tiny Tasks API
   version: 1.0.0
+  description: |
+    A minimal JSON API for demonstration and interviews.
+    - **No auth required**
+    - **JSON-only responses**
+    - Clean, predictable status codes
+
+    #### Conventions
+    - Timestamps are ISO-8601 in UTC.
+    - Errors follow a consistent shape with `error` (string).
+
 servers:
   - url: http://localhost:3000
+    description: Local dev
+
+tags:
+  - name: Health
+    description: Liveness / readiness check
+  - name: Tasks
+    description: Simple in-memory tasks (demo only)
+
 paths:
   /health:
     get:
+      tags: [Health]
+      summary: Health check
+      description: Returns API health status.
       responses:
-        '200': { description: OK }
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+
   /tasks:
     get:
+      tags: [Tasks]
+      summary: List tasks
+      description: Returns a small in-memory list of tasks (demo data).
+      parameters:
+        - in: query
+          name: completed
+          schema:
+            type: boolean
+          description: Filter by completion state (optional)
+          examples:
+            onlyIncomplete:
+              summary: Only incomplete
+              value: false
+            onlyComplete:
+              summary: Only complete
+              value: true
       responses:
-        '200': { description: List tasks }
-    post:
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [title]
-              properties: { title: { type: string } }
-      responses:
-        '201': { description: Created }
-        '400': { description: Bad Request }
-  /tasks/{id}:
-    get:
-      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
-      responses:
-        '200': { description: One }
-        '404': { description: Not found }
-    delete:
-      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
-      responses:
-        '200': { description: Deleted }
-        '404': { description: Not found }
+        '200':
+          description: Array of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+              examples:
+                sample:
+                  value:
+                    - id: 1
+                      title: First Task
+                      completed: false
+                    - id: 2
+                      title: Second Task
+                      completed: true
+        '500':
+          description: Server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Task:
+      type: object
+      required: [id, title, completed]
+      properties:
+        id:
+          type: integer
+          format: int32
+          example: 1
+        title:
+          type: string
+          example: First Task
+        completed:
+          type: boolean
+          example: false
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: Not Found

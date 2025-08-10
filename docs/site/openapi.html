@@ -5,9 +5,64 @@
     <title>Tiny Tasks API – OpenAPI</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
-    <style>html,body{height:100%;margin:0} redoc{height:100%}</style>
+    <style>html,body{height:100%;margin:0} #redoc{height:100%}</style>
   </head>
   <body>
-    <redoc spec-url="../../openapi.yaml"></redoc>
+    <div id="redoc"></div>
+    <script>
+      const spec = {
+        openapi: "3.0.0",
+        info: {
+          title: "Tiny Tasks API",
+          version: "1.0.0",
+          description: "Minimal API for portfolio demonstration."
+        },
+        servers: [{ url: "http://localhost:3000" }],
+        paths: {
+          "/health": {
+            get: {
+              summary: "Health check",
+              responses: {
+                "200": {
+                  description: "API is healthy",
+                  content: {
+                    "application/json": {
+                      schema: { type: "object", properties: { status: { type: "string", example: "ok" } } }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "/tasks": {
+            get: {
+              summary: "List tasks",
+              responses: {
+                "200": {
+                  description: "Array of tasks",
+                  content: {
+                    "application/json": {
+                      schema: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            id: { type: "integer", example: 1 },
+                            title: { type: "string", example: "First Task" },
+                            completed: { type: "boolean", example: false }
+                          },
+                          required: ["id","title","completed"]
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      };
+      Redoc.init(spec, {}, document.getElementById('redoc'));
+    </script>
   </body>
 </html>

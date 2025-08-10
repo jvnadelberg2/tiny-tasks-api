@@ -1,36 +1,28 @@
-import http from 'node:http';
+// Top imports if not present:
+import { readFile } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
+import { dirname, join } from 'node:path';
 
-const tasks = [
-  { id: 1, title: 'First Task', completed: false },
-  { id: 2, title: 'Second Task', completed: true }
-];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-export function createServer() {
-  return http.createServer((req, res) => {
-    // Health check
-    if (req.url === '/health' && req.method === 'GET') {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
-      return;
-    }
-
-    // List tasks
-    if (req.url === '/tasks' && req.method === 'GET') {
-      res.writeHead(200, { 'content-type': 'application/json' });
-      res.end(JSON.stringify(tasks));
-      return;
-    }
-
-    // Not found
-    res.writeHead(404, { 'content-type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not Found' }));
+// Inside request handler:
+if (req.url === '/docs' || req.url === '/openapi.html') {
+  const html = await readFile(join(__dirname, 'openapi.html'), 'utf8');
+  res.writeHead(200, {
+    'content-type': 'text/html; charset=utf-8',
+    'cache-control': 'no-store'
   });
+  res.end(html);
+  return;
 }
 
-// Start the server only if this file is run directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const port = process.env.PORT || 3000;
-  createServer().listen(port, () => {
-    console.log(`Server listening on http://localhost:${port}`);
+if (req.url === '/openapi.yaml') {
+  const yaml = await readFile(join(__dirname, 'openapi.yaml'), 'utf8');
+  res.writeHead(200, {
+    'content-type': 'application/yaml; charset=utf-8',
+    'cache-control': 'no-store'
   });
+  res.end(yaml);
+  return;
 }
