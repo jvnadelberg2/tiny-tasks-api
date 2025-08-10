@@ -1,0 +1,38 @@
+openapi: 3.0.3
+info:
+  title: Tiny Tasks API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /health:
+    get:
+      responses:
+        '200': { description: OK }
+  /tasks:
+    get:
+      responses:
+        '200': { description: List tasks }
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [title]
+              properties: { title: { type: string } }
+      responses:
+        '201': { description: Created }
+        '400': { description: Bad Request }
+  /tasks/{id}:
+    get:
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses:
+        '200': { description: One }
+        '404': { description: Not found }
+    delete:
+      parameters: [{ in: path, name: id, required: true, schema: { type: integer } }]
+      responses:
+        '200': { description: Deleted }
+        '404': { description: Not found }
