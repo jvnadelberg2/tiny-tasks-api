@@ -1,14 +1,14 @@
 {
   "name": "tiny-tasks-api",
   "version": "1.0.0",
-  "description": "Minimal REST API using only Node core modules. Includes OpenAPI.",
-  "main": "index.js",
+  "description": "Tiny Tasks API - portfolio-ready example",
+  "type": "module",
+  "main": "server.js",
+  "engines": { "node": ">=18" },
   "scripts": {
     "start": "node server.js",
     "test": "node --test"
   },
-  "license": "MIT",
-  "engines": { "node": ">=18" },
-}
+  "dependencies": {},
+  "devDependencies": {}
 
-}
