@@ -2,35 +2,18 @@ openapi: 3.0.3
 info:
   title: Tiny Tasks API
   version: 1.0.0
-  description: |
-    A minimal JSON API for demonstration and interviews.
-    - **No auth required**
-    - **JSON-only responses**
-    - Clean, predictable status codes
-
-    #### Conventions
-    - Timestamps are ISO-8601 in UTC.
-    - Errors follow a consistent shape with `error` (string).
+  description: Minimal task API using only Node.js core modules.
 
 servers:
   - url: http://localhost:3000
-    description: Local dev
-
-tags:
-  - name: Health
-    description: Liveness / readiness check
-  - name: Tasks
-    description: Simple in-memory tasks (demo only)
 
 paths:
   /health:
     get:
-      tags: [Health]
       summary: Health check
-      description: Returns API health status.
       responses:
         '200':
-          description: API is healthy
+          description: Service is running
           content:
             application/json:
               schema:
@@ -42,22 +25,7 @@ paths:
 
   /tasks:
     get:
-      tags: [Tasks]
       summary: List tasks
-      description: Returns a small in-memory list of tasks (demo data).
-      parameters:
-        - in: query
-          name: completed
-          schema:
-            type: boolean
-          description: Filter by completion state (optional)
-          examples:
-            onlyIncomplete:
-              summary: Only incomplete
-              value: false
-            onlyComplete:
-              summary: Only complete
-              value: true
       responses:
         '200':
           description: Array of tasks
@@ -71,13 +39,102 @@ paths:
                 sample:
                   value:
                     - id: 1
-                      title: First Task
+                      title: "First Task"
                       completed: false
                     - id: 2
-                      title: Second Task
+                      title: "Second Task"
                       completed: true
-        '500':
-          description: Server error
+    post:
+      summary: Create task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+            examples:
+              create:
+                value:
+                  title: "demo task"
+                  due: "2025-12-31"
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /tasks/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: integer
+          format: int64
+        description: Task ID
+    get:
+      summary: Get task by ID
+      responses:
+        '200':
+          description: The task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    put:
+      summary: Update task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+            examples:
+              update:
+                value:
+                  title: "updated"
+                  due: "2025-12-31"
+                  completed: true
+      responses:
+        '200':
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Delete task
+      responses:
+        '204':
+          description: Deleted (no content)
+        '404':
+          description: Not found
           content:
             application/json:
               schema:
@@ -91,18 +148,44 @@ components:
       properties:
         id:
           type: integer
-          format: int32
-          example: 1
+          format: int64
+          example: 1754922040132
         title:
           type: string
-          example: First Task
+          example: "demo task"
+        due:
+          type: string
+          description: ISO-like date string (YYYY-MM-DD)
+          example: "2025-12-31"
         completed:
           type: boolean
           example: false
+
+    TaskCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+        due:
+          type: string
+          description: ISO-like date string (YYYY-MM-DD)
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        due:
+          type: string
+          description: ISO-like date string (YYYY-MM-DD)
+        completed:
+          type: boolean
+
     Error:
       type: object
       required: [error]
       properties:
         error:
           type: string
-          example: Not Found
+          example: "Not Found"

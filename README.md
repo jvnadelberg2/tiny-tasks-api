@@ -1,60 +1,98 @@
+=====================
+
 # Tiny Tasks API
 
-A minimal Node.js REST API with built-in, styled API documentation. Designed as a clean, self-contained portfolio example to demonstrate: Pure Node.js HTTP server (no frameworks), API endpoints with JSON responses, OpenAPI 3.0.3 specification (`openapi.yaml`), and Redoc rendering served directly by the app.
+A minimal, self-contained Node.js REST API demonstrating clean design, in-code documentation, and OpenAPI-powered developer docs — all without external dependencies.
 
-## Requirements
-- Node.js v18 or newer (developed on v22)
-- npm (comes with Node.js)
+---
 
-## Quick Start
-Clone the repo and install dependencies:
+## Features
+- **No dependencies:** Built entirely with Node.js core modules.
+- **RESTful endpoints:** `GET`, `POST`, `PUT`, and `DELETE` for `/tasks`.
+- **OpenAPI 3.0 spec:** Served as YAML and rendered in-browser with Redoc.
+- **Health check endpoint:** For uptime monitoring or automation scripts.
+- **In-memory storage:** Simple, reset-on-restart dataset for demonstration.
+- **Well-documented code:** Inline comments explain key design decisions.
+
+---
+
+## Quickstart
+
+### 1. Clone & Install
 ```bash
 git clone https://github.com/jvnadelberg2/tiny-tasks-api.git
 cd tiny-tasks-api
-npm install
 ```
+_No dependencies to install — everything runs on vanilla Node.js._
 
-Start the server:
+### 2. Run the API
 ```bash
-npm start
+node server.js
 ```
-
-You’ll see output similar to:
+You’ll see:
 ```
 Server running at http://localhost:3000
-Docs:   http://localhost:3000/docs
 Health: http://localhost:3000/health
 Tasks:  http://localhost:3000/tasks
+Docs:   http://localhost:3000/docs
 ```
 
-## View the API
-- Docs (Redoc UI): http://localhost:3000/docs — Full, styled API reference generated from `openapi.yaml`.
-- Health endpoint: http://localhost:3000/health — Returns `{ "status": "ok" }`.
-- Tasks endpoint: http://localhost:3000/tasks — Returns a demo list of tasks.
-- Raw OpenAPI spec: http://localhost:3000/openapi.yaml
+---
 
-## Endpoints Overview
-### GET /health
-Check API liveness.
+## Endpoints
 
-**Response**
-```json
-{ "status": "ok" }
+| Method | Path              | Description                              |
+|--------|-------------------|------------------------------------------|
+| GET    | `/health`         | Returns `{ status: "ok" }`                |
+| GET    | `/tasks`          | List all tasks                            |
+| POST   | `/tasks`          | Create a task                             |
+| GET    | `/tasks/{id}`     | Get a task by ID                          |
+| PUT    | `/tasks/{id}`     | Update a task by ID                       |
+| DELETE | `/tasks/{id}`     | Delete a task by ID                       |
+| GET    | `/openapi.yaml`   | Download the OpenAPI YAML spec            |
+| GET    | `/docs`           | View interactive API docs (Redoc)         |
+
+---
+
+## Example Usage
+
+### Create a Task
+```bash
+curl -X POST http://localhost:3000/tasks   -H "Content-Type: application/json"   -d '{"title":"demo","due":"2025-12-31"}'
 ```
 
-### GET /tasks
-List demo tasks.
-
-**Response**
-```json
-[
-  { "id": 1, "title": "First Task", "completed": false },
-  { "id": 2, "title": "Second Task", "completed": true }
-]
+### Update a Task
+```bash
+curl -X PUT http://localhost:3000/tasks/1   -H "Content-Type: application/json"   -d '{"completed":true}'
 ```
+
+### Delete a Task
+```bash
+curl -X DELETE http://localhost:3000/tasks/1
+```
+
+---
 
 ## OpenAPI Documentation
-The API is documented in `openapi.yaml` using OpenAPI 3.0.3. It’s rendered automatically via Redoc at `/docs` when the server is running.
+
+- **YAML Spec:** [http://localhost:3000/openapi.yaml](http://localhost:3000/openapi.yaml)  
+- **Rendered Docs:** [http://localhost:3000/docs](http://localhost:3000/docs)  
+
+---
+
+## Project Structure
+
+```
+tiny-tasks-api/
+├── server.js           # Main API implementation
+├── openapi.yaml        # OpenAPI 3.0 definition
+├── openapi.html        # Redoc HTML viewer
+├── README.md           # This file
+├── ARCHITECTURE.md     # Design & technical notes
+└── tests/              # Endpoint tests
+```
+
+---
 
 ## License
-Licensed under the MIT License — see the LICENSE file for details.
+MIT

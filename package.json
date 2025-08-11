@@ -1,16 +1,9 @@
 {
   "name": "tiny-tasks-api",
   "version": "1.0.0",
-  "description": "Tiny Tasks API - portfolio-ready example",
-  "type": "module",
+  "description": "A minimal REST API for managing tasks using only Node.js core modules.",
   "main": "server.js",
-  "engines": {
-    "node": ">=18"
-  },
-  "scripts": {
-    "start": "node server.js",
-    "test": "node --test"
-  },
-  "dependencies": {},
-  "devDependencies": {}
+  "scripts": { "start": "node server.js" },
+  "license": "MIT",
+  "private": true
 }
