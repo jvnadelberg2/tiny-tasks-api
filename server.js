@@ -1,11 +1,69 @@
 // server.js
 // Tiny Tasks API — CommonJS, no dependencies.
+// Adds request logging, error logging, and basic /metrics.
 
 const http = require('node:http');
 const { readFile } = require('node:fs/promises');
 const { join } = require('node:path');
 const { URL } = require('node:url');
 
+// -------------------------------
+// Observability (no deps)
+// -------------------------------
+const startTime = Date.now();
+let reqSeq = 0;
+const metrics = {
+  startTime,
+  totalRequests: 0,
+  totalErrors: 0,
+  statusCounts: {},          // e.g., { '200': 10, '404': 3 }
+  methodCounts: {},          // e.g., { 'GET': 12, 'POST': 2 }
+  routeCounts: {},           // e.g., { '/tasks': 8, '/tasks/:id': 4 }
+};
+
+function hrNow() { return Number(process.hrtime.bigint()) / 1e6; } // ms
+function formatTs(d = new Date()) { return d.toISOString(); }
+function routeKey(pathname) {
+  const m = pathname.match(/^\/tasks\/([^/]+)$/);
+  if (m) return '/tasks/:id';
+  return pathname;
+}
+
+function attachLogger(req, res) {
+  const id = ++reqSeq;
+  const startedAt = hrNow();
+  const { method } = req;
+  const url = new URL(req.url, `http://${req.headers.host}`);
+  const { pathname, search } = url;
+
+  metrics.totalRequests += 1;
+  metrics.methodCounts[method] = (metrics.methodCounts[method] || 0) + 1;
+  const bucket = routeKey(pathname);
+  metrics.routeCounts[bucket] = (metrics.routeCounts[bucket] || 0) + 1;
+
+  res.on('finish', () => {
+    const durationMs = (hrNow() - startedAt).toFixed(1);
+    const status = res.statusCode;
+    metrics.statusCounts[String(status)] = (metrics.statusCounts[String(status)] || 0) + 1;
+    const len = res.getHeader('content-length');
+    console.log(
+      `[${formatTs()}] req#${id} ${method} ${pathname}${search || ''} -> ${status} ${durationMs}ms` +
+      (len ? ` ${len}B` : '')
+    );
+  });
+
+  return { id, pathname, startedAt };
+}
+
+function logError(ctx, err) {
+  metrics.totalErrors += 1;
+  const rid = ctx?.id ? `req#${ctx.id} ` : '';
+  console.error(`[${formatTs()}] ${rid}ERROR: ${err && err.stack ? err.stack : err}`);
+}
+
+// -------------------------------
+// App state
+// -------------------------------
 const tasks = [];
 
 function sendJson(res, code, obj) {
@@ -21,6 +79,7 @@ function notFound(res) { sendJson(res, 404, { error: 'Not Found' }); }
 function badRequest(res, msg = 'Bad Request') { sendJson(res, 400, { error: msg }); }
 function methodNotAllowed(res, allow) { res.writeHead(405, { allow }); res.end(); }
 function nextId() { return tasks.length ? Math.max(...tasks.map(t => t.id)) + 1 : 1; }
+
 function readJsonBody(req) {
   return new Promise((resolve, reject) => {
     let data = '';
@@ -36,32 +95,50 @@ function readJsonBody(req) {
   });
 }
 
+// -------------------------------
+/* Server */
+// -------------------------------
 function createServer() {
   return http.createServer(async (req, res) => {
+    const ctx = attachLogger(req, res);
     try {
       const url = new URL(req.url, `http://${req.headers.host}`);
       const { pathname } = url;
 
-      // Docs HTML
+      // ---- Docs HTML
       if ((pathname === '/docs' || pathname === '/openapi.html') && req.method === 'GET') {
         const html = await readFile(join(__dirname, 'openapi.html'), 'utf8');
         res.writeHead(200, { 'content-type': 'text/html; charset=utf-8', 'cache-control': 'no-store' });
         return res.end(html);
       }
 
-      // OpenAPI YAML
+      // ---- OpenAPI YAML
       if (pathname === '/openapi.yaml' && req.method === 'GET') {
         const yaml = await readFile(join(__dirname, 'openapi.yaml'), 'utf8');
         res.writeHead(200, { 'content-type': 'application/yaml; charset=utf-8', 'cache-control': 'no-store' });
         return res.end(yaml);
       }
 
-      // Health
+      // ---- Health
       if (pathname === '/health' && req.method === 'GET') {
         return sendJson(res, 200, { status: 'ok' });
       }
 
-      // Collection: /tasks
+      // ---- Metrics (observability)
+      if (pathname === '/metrics' && req.method === 'GET') {
+        const now = Date.now();
+        const uptimeSeconds = Math.floor((now - metrics.startTime) / 1000);
+        return sendJson(res, 200, {
+          uptimeSeconds,
+          totalRequests: metrics.totalRequests,
+          totalErrors: metrics.totalErrors,
+          statusCounts: metrics.statusCounts,
+          methodCounts: metrics.methodCounts,
+          routeCounts: metrics.routeCounts,
+        });
+      }
+
+      // ---- Tasks collection
       if (pathname === '/tasks') {
         if (req.method === 'GET') {
           return sendJson(res, 200, tasks);
@@ -82,7 +159,7 @@ function createServer() {
         return methodNotAllowed(res, 'GET, POST');
       }
 
-      // Item: /tasks/{id}
+      // ---- Task item
       const m = pathname.match(/^\/tasks\/(\d+)$/);
       if (m) {
         const id = Number(m[1]);
@@ -119,22 +196,25 @@ function createServer() {
         return methodNotAllowed(res, 'GET, PUT, DELETE');
       }
 
-      // Fallback
+      // ---- Fallback
       return notFound(res);
+
     } catch (err) {
-      console.error(err);
+      logError(ctx, err);
       return sendJson(res, 500, { error: 'Internal Server Error' });
     }
   });
 }
 
+// Start server if run directly
 if (require.main === module) {
   const port = process.env.PORT || 3000;
   createServer().listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
-    console.log(`Health: http://localhost:${port}/health`);
-    console.log(`Tasks:  http://localhost:${port}/tasks`);
-    console.log(`Docs:   http://localhost:${port}/docs`);
+    console.log(`Health:  http://localhost:${port}/health`);
+    console.log(`Tasks:   http://localhost:${port}/tasks`);
+    console.log(`Docs:    http://localhost:${port}/docs`);
+    console.log(`Metrics: http://localhost:${port}/metrics`);
   });
 }
 

@@ -3,17 +3,27 @@ info:
   title: Tiny Tasks API
   version: 1.0.0
   description: Minimal task API using only Node.js core modules.
-
 servers:
   - url: http://localhost:3000
+tags:
+  - name: Health
+  - name: Tasks
+  - name: Docs
 
 paths:
   /health:
     get:
+      tags: [Health]
       summary: Health check
+      description: Returns service status.
+      x-codeSamples:
+        - lang: Bash
+          label: cURL
+          source: |
+            curl -i http://localhost:3000/health
       responses:
         '200':
-          description: Service is running
+          description: OK
           content:
             application/json:
               schema:
@@ -22,10 +32,20 @@ paths:
                   status:
                     type: string
                     example: ok
+              examples:
+                ok:
+                  value: { status: ok }
 
   /tasks:
     get:
+      tags: [Tasks]
       summary: List tasks
+      description: Returns all tasks.
+      x-codeSamples:
+        - lang: Bash
+          label: cURL
+          source: |
+            curl -i http://localhost:3000/tasks
       responses:
         '200':
           description: Array of tasks
@@ -36,16 +56,23 @@ paths:
                 items:
                   $ref: '#/components/schemas/Task'
               examples:
-                sample:
+                example:
                   value:
                     - id: 1
-                      title: "First Task"
+                      title: "demo"
+                      due: "2025-12-31"
                       completed: false
-                    - id: 2
-                      title: "Second Task"
-                      completed: true
     post:
+      tags: [Tasks]
       summary: Create task
+      description: Creates a new task.
+      x-codeSamples:
+        - lang: Bash
+          label: cURL
+          source: |
+            curl -i -X POST http://localhost:3000/tasks \
+              -H "Content-Type: application/json" \
+              -d '{"title":"demo","due":"2025-12-31"}'
       requestBody:
         required: true
         content:
@@ -54,9 +81,7 @@ paths:
               $ref: '#/components/schemas/TaskCreate'
             examples:
               create:
-                value:
-                  title: "demo task"
-                  due: "2025-12-31"
+                value: { title: "demo", due: "2025-12-31" }
       responses:
         '201':
           description: Created
@@ -76,15 +101,21 @@ paths:
       - name: id
         in: path
         required: true
+        description: Task ID
         schema:
           type: integer
           format: int64
-        description: Task ID
     get:
+      tags: [Tasks]
       summary: Get task by ID
+      x-codeSamples:
+        - lang: Bash
+          label: cURL
+          source: |
+            curl -i http://localhost:3000/tasks/1
       responses:
         '200':
-          description: The task
+          description: Task
           content:
             application/json:
               schema:
@@ -96,7 +127,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     put:
+      tags: [Tasks]
       summary: Update task
+      x-codeSamples:
+        - lang: Bash
+          label: cURL
+          source: |
+            curl -i -X PUT http://localhost:3000/tasks/1 \
+              -H "Content-Type: application/json" \
+              -d '{"title":"updated","due":"2025-12-31","completed":true}'
       requestBody:
         required: true
         content:
@@ -105,10 +144,7 @@ paths:
               $ref: '#/components/schemas/TaskUpdate'
             examples:
               update:
-                value:
-                  title: "updated"
-                  due: "2025-12-31"
-                  completed: true
+                value: { completed: true }
       responses:
         '200':
           description: Updated task
@@ -129,7 +165,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
     delete:
+      tags: [Tasks]
       summary: Delete task
+      x-codeSamples:
+        - lang: Bash
+          label: cURL
+          source: |
+            curl -i -X DELETE http://localhost:3000/tasks/1
       responses:
         '204':
           description: Deleted (no content)
@@ -149,43 +191,33 @@ components:
         id:
           type: integer
           format: int64
-          example: 1754922040132
+          example: 1
         title:
           type: string
-          example: "demo task"
+          example: demo
         due:
           type: string
-          description: ISO-like date string (YYYY-MM-DD)
-          example: "2025-12-31"
+          description: Date in YYYY-MM-DD format
+          example: '2025-12-31'
         completed:
           type: boolean
           example: false
-
     TaskCreate:
       type: object
       required: [title]
       properties:
-        title:
-          type: string
-        due:
-          type: string
-          description: ISO-like date string (YYYY-MM-DD)
-
+        title: { type: string, example: demo }
+        due: { type: string, example: '2025-12-31' }
     TaskUpdate:
       type: object
       properties:
-        title:
-          type: string
-        due:
-          type: string
-          description: ISO-like date string (YYYY-MM-DD)
-        completed:
-          type: boolean
-
+        title: { type: string, example: updated }
+        due: { type: string, example: '2025-12-31' }
+        completed: { type: boolean, example: true }
     Error:
       type: object
       required: [error]
       properties:
         error:
           type: string
-          example: "Not Found"
+          example: Not Found

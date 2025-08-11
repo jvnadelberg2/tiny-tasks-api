@@ -1,98 +1,82 @@
-=====================
-
 # Tiny Tasks API
 
-A minimal, self-contained Node.js REST API demonstrating clean design, in-code documentation, and OpenAPI-powered developer docs — all without external dependencies.
+Minimal, dependency-free Node.js API for portfolio/demo purposes. Provides live API docs (Redoc, Swagger UI), Prometheus-style metrics, and structured JSON request logs.
 
----
+## Requirements
+- Node.js 18+ (20+ recommended)
+- No external NPM dependencies
 
-## Features
-- **No dependencies:** Built entirely with Node.js core modules.
-- **RESTful endpoints:** `GET`, `POST`, `PUT`, and `DELETE` for `/tasks`.
-- **OpenAPI 3.0 spec:** Served as YAML and rendered in-browser with Redoc.
-- **Health check endpoint:** For uptime monitoring or automation scripts.
-- **In-memory storage:** Simple, reset-on-restart dataset for demonstration.
-- **Well-documented code:** Inline comments explain key design decisions.
-
----
-
-## Quickstart
-
-### 1. Clone & Install
+## Installation
 ```bash
-git clone https://github.com/jvnadelberg2/tiny-tasks-api.git
+git clone <REPO URL> tiny-tasks-api
 cd tiny-tasks-api
 ```
-_No dependencies to install — everything runs on vanilla Node.js._
 
-### 2. Run the API
+## Run
 ```bash
 node server.js
-```
-You’ll see:
-```
-Server running at http://localhost:3000
-Health: http://localhost:3000/health
-Tasks:  http://localhost:3000/tasks
-Docs:   http://localhost:3000/docs
+# optionally:
+# PORT=3000 node server.js
+# npm start   # if defined in package.json
 ```
 
----
-
-## Endpoints
-
-| Method | Path              | Description                              |
-|--------|-------------------|------------------------------------------|
-| GET    | `/health`         | Returns `{ status: "ok" }`                |
-| GET    | `/tasks`          | List all tasks                            |
-| POST   | `/tasks`          | Create a task                             |
-| GET    | `/tasks/{id}`     | Get a task by ID                          |
-| PUT    | `/tasks/{id}`     | Update a task by ID                       |
-| DELETE | `/tasks/{id}`     | Delete a task by ID                       |
-| GET    | `/openapi.yaml`   | Download the OpenAPI YAML spec            |
-| GET    | `/docs`           | View interactive API docs (Redoc)         |
-
----
-
-## Example Usage
-
-### Create a Task
+Verify:
 ```bash
-curl -X POST http://localhost:3000/tasks   -H "Content-Type: application/json"   -d '{"title":"demo","due":"2025-12-31"}'
+curl http://localhost:3000/health
 ```
 
-### Update a Task
+## API Documentation
+- Redoc: http://localhost:3000/docs  
+- Swagger UI: http://localhost:3000/docs-swagger  
+- OpenAPI (YAML): http://localhost:3000/openapi.yaml
+
+## Curl Quickstart
 ```bash
-curl -X PUT http://localhost:3000/tasks/1   -H "Content-Type: application/json"   -d '{"completed":true}'
+chmod +x examples/curl-quickstart.sh
+./examples/curl-quickstart.sh
 ```
 
-### Delete a Task
+## Observability
+
+### Structured Request Logs
+One JSON line per request is written to stdout:
+```json
+{"t":"2025-08-11T00:00:00.000Z","method":"GET","path":"/tasks","route":"/tasks","status":200,"dur_ms":3,"ua":"curl/8.4.0","ip":"::1"}
+```
+Pretty-print locally:
 ```bash
-curl -X DELETE http://localhost:3000/tasks/1
+node server.js 2>&1 | jq .
 ```
 
----
-
-## OpenAPI Documentation
-
-- **YAML Spec:** [http://localhost:3000/openapi.yaml](http://localhost:3000/openapi.yaml)  
-- **Rendered Docs:** [http://localhost:3000/docs](http://localhost:3000/docs)  
-
----
-
-## Project Structure
-
+### Metrics (Prometheus)
+Text exposition at:
 ```
-tiny-tasks-api/
-├── server.js           # Main API implementation
-├── openapi.yaml        # OpenAPI 3.0 definition
-├── openapi.html        # Redoc HTML viewer
-├── README.md           # This file
-├── ARCHITECTURE.md     # Design & technical notes
-└── tests/              # Endpoint tests
+http://localhost:3000/metrics
+```
+Includes `http_requests_total{method,route,status}`, `process_uptime_seconds`, and `process_memory_bytes{type=...}`.
+
+## Endpoints (Summary)
+- `GET /health`
+- `GET /metrics`
+- `GET /docs`
+- `GET /docs-swagger`
+- `GET /openapi.yaml`
+- `GET /tasks`
+- `POST /tasks`
+- `GET /tasks/{id}`
+- `PUT /tasks/{id}`
+- `PATCH /tasks/{id}`
+- `DELETE /tasks/{id}`
+
+## Configuration
+- `PORT` (default: `3000`)
+
+## Development
+```bash
+node --watch server.js
 ```
 
----
-
-## License
-MIT
+## Troubleshooting
+- `EADDRINUSE`: choose another port (`PORT=3001 node server.js`).
+- `/openapi.yaml` returns 404: ensure `openapi.yaml` exists at project root and the server is started from that directory.
+- Swagger UI requires network access to the CDN. Redoc at `/docs` works offline.
