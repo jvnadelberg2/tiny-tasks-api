@@ -1,0 +1,28 @@
+name: OpenAPI Lint
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  lint-openapi:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      # Lint with Redocly (style/consistency rules)
+      - name: Lint OpenAPI with Redocly
+        run: npx @redocly/cli@latest lint openapi.yaml
+
+      # Strict schema validation (structure correctness)
+      - name: Validate OpenAPI with swagger-cli
+        run: npx @apidevtools/swagger-cli@latest validate openapi.yaml
+

@@ -1,0 +1,8 @@
+node_modules
+coverage
+dist
+.build
+.tmp
+docs/site
+openapi.html
+

@@ -1,4 +1,11 @@
-{
+"scripts": {
+  "start": "node server.js",
+  "lint": "eslint .",
+  "lint:fix": "eslint . --fix",
+  "test": "node --test",
+  "coverage": "nyc npm test"
+},
+
   "name": "tiny-tasks-api",
   "version": "1.0.0",
   "description": "A minimal REST API for managing tasks using only Node.js core modules.",

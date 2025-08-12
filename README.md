@@ -1,82 +1,116 @@
 # Tiny Tasks API
 
-Minimal, dependency-free Node.js API for portfolio/demo purposes. Provides live API docs (Redoc, Swagger UI), Prometheus-style metrics, and structured JSON request logs.
+[![CI](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml/badge.svg)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml)
+[![OpenAPI Lint](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml/badge.svg)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml)
+[![Coverage](https://codecov.io/gh/jvnadelberg2/tiny-tasks-api/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jvnadelberg2/tiny-tasks-api)
+![Node](https://img.shields.io/badge/node-20.x-brightgreen?logo=node.js)
+![License](https://img.shields.io/badge/license-MIT-black.svg)
 
-## Requirements
-- Node.js 18+ (20+ recommended)
-- No external NPM dependencies
+Minimal, dependency-light Node.js REST API for managing tiny tasks, with OpenAPI-powered docs and a clean, interview-ready repo structure.
 
-## Installation
+---
+
+## Quickstart
+
 ```bash
-git clone <REPO URL> tiny-tasks-api
-cd tiny-tasks-api
+# 1) Install
+npm ci
+
+# 2) Lint and test
+npm run lint
+npm test
+
+# 3) (Optional) Coverage report
+npm run coverage
+# HTML report at ./coverage/index.html
+
+# 4) Run
+npm start
+# → http://localhost:3000
 ```
 
-## Run
+**Smoke check:**
 ```bash
-node server.js
-# optionally:
-# PORT=3000 node server.js
-# npm start   # if defined in package.json
+curl -s http://localhost:3000/health | jq
+# { "status": "ok" }
 ```
 
-Verify:
+**One-liner:**
 ```bash
-curl http://localhost:3000/health
+npm ci && npm run lint && npm test && npm start
 ```
 
-## API Documentation
-- Redoc: http://localhost:3000/docs  
-- Swagger UI: http://localhost:3000/docs-swagger  
-- OpenAPI (YAML): http://localhost:3000/openapi.yaml
+---
 
-## Curl Quickstart
-```bash
-chmod +x examples/curl-quickstart.sh
-./examples/curl-quickstart.sh
-```
+## API Overview
 
-## Observability
+Base URL: `http://localhost:3000`  
+Endpoints and request/response examples are documented here: **[docs/API.md](./docs/API.md)**.  
+OpenAPI spec: **[openapi.yaml](./openapi.yaml)**  
+Rendered HTML: **open `openapi.html`** or `docs/site/openapi.html` in a browser.
 
-### Structured Request Logs
-One JSON line per request is written to stdout:
-```json
-{"t":"2025-08-11T00:00:00.000Z","method":"GET","path":"/tasks","route":"/tasks","status":200,"dur_ms":3,"ua":"curl/8.4.0","ip":"::1"}
-```
-Pretty-print locally:
-```bash
-node server.js 2>&1 | jq .
-```
+---
 
-### Metrics (Prometheus)
-Text exposition at:
-```
-http://localhost:3000/metrics
-```
-Includes `http_requests_total{method,route,status}`, `process_uptime_seconds`, and `process_memory_bytes{type=...}`.
+## Documentation Map
 
-## Endpoints (Summary)
-- `GET /health`
-- `GET /metrics`
-- `GET /docs`
-- `GET /docs-swagger`
-- `GET /openapi.yaml`
-- `GET /tasks`
-- `POST /tasks`
-- `GET /tasks/{id}`
-- `PUT /tasks/{id}`
-- `PATCH /tasks/{id}`
-- `DELETE /tasks/{id}`
+- [`docs/API.md`](./docs/API.md) — full endpoint reference and examples
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
+- [`docs/OPERATIONS.md`](./docs/OPERATIONS.md)
+- [`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md)
+- [`docs/SECURITY.md`](./docs/SECURITY.md)
+- [`docs/FAQ.md`](./docs/FAQ.md)
+- [`docs/CHANGELOG.md`](./docs/CHANGELOG.md)
+- [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
 
-## Configuration
-- `PORT` (default: `3000`)
+---
 
 ## Development
-```bash
-node --watch server.js
+
+Requirements:
+- Node.js 20 (see [`.nvmrc`](./.nvmrc))
+
+Conventions:
+- Lint: `npm run lint` (`.eslintrc.json`)
+- Format: Prettier (`.prettierrc`)
+- Editor settings: `.editorconfig`
+
+Scripts:
+```json
+{
+  "start": "node server.js",
+  "lint": "eslint .",
+  "lint:fix": "eslint . --fix",
+  "test": "node --test",
+  "coverage": "nyc npm test"
+}
 ```
 
-## Troubleshooting
-- `EADDRINUSE`: choose another port (`PORT=3001 node server.js`).
-- `/openapi.yaml` returns 404: ensure `openapi.yaml` exists at project root and the server is started from that directory.
-- Swagger UI requires network access to the CDN. Redoc at `/docs` works offline.
+---
+
+## Testing & Coverage
+
+- Test runner: Node’s built-in test runner (`node --test`)
+- Coverage via `nyc` (Istanbul). Config: [`.nycrc.json`](./.nycrc.json)
+
+CI runs:
+- Lint
+- Tests on Node 18/20/22
+- Coverage upload (Codecov) — add `CODECOV_TOKEN` to repo secrets to enable badge
+
+---
+
+## Contributing
+
+See [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
+
+## Security
+
+See [`docs/SECURITY.md`](./docs/SECURITY.md).
+
+## License
+
+MIT — see [`LICENSE`](./LICENSE).
+
+## Project Status
+
+Maintained as a compact, production-adjacent demo suitable for code/doc reviews.
