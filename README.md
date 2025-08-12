@@ -1,10 +1,10 @@
 # Tiny Tasks API
 
-[![CI](https://github.com/your-username/tiny-tasks-api/actions/workflows/ci.yml/badge.svg)](https://github.com/your-username/tiny-tasks-api/actions/workflows/ci.yml)
-[![OpenAPI Lint](https://github.com/your-username/tiny-tasks-api/actions/workflows/openapi-lint.yml/badge.svg)](https://github.com/your-username/tiny-tasks-api/actions/workflows/openapi-lint.yml)
-[![Coverage](https://img.shields.io/badge/coverage-96%25-brightgreen)](#) 
-[![Node.js](https://img.shields.io/badge/node-%3E%3D18-blue.svg)](https://nodejs.org/)
-[![License](https://img.shields.io/github/license/your-username/tiny-tasks-api)](LICENSE)
+[![CI](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml)
+[![OpenAPI Lint](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml)
+[![Coverage](https://codecov.io/gh/jvnadelberg2/tiny-tasks-api/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jvnadelberg2/tiny-tasks-api)
+![Node](https://img.shields.io/badge/node-20.x-brightgreen?logo=node.js)
+[![License](https://img.shields.io/github/license/jvnadelberg2/tiny-tasks-api)](LICENSE)
 
 
 Minimal, dependency-light Node.js REST API for managing tiny tasks, with OpenAPI-powered docs and a clean, interview-ready repo structure.
