@@ -1,90 +1,78 @@
-Here’s a cleaned-up, presentation-ready `architecture.md` you can drop in:
-
----
-
 # Architecture
 
-**Project:** Tiny Tasks API
-**Purpose:** Minimal Node.js REST API with self-contained documentation (Redoc) and no external dependencies.
+## Overview
+
+The Tiny Tasks API is a minimal REST API built entirely with Node.js core modules. It demonstrates professional software engineering and technical writing practices without relying on frameworks like Express. The application provides CRUD operations for tasks, serves built-in API documentation, and includes automated tests, linting, and CI/CD integration.
+
+The design prioritizes:
+- Simplicity
+- Portability
+- Educational value
+- Documentation completeness
 
 ---
 
-## Runtime & Core Technologies
+## Components
 
-* **Node.js:** v18+ (tested up to v22)
-* **HTTP Layer:** Native `node:http` module (no Express/Koa)
-* **State Management:** In-memory JavaScript array (`tasks`) — suitable for demo and testing
-* **File Serving:** `fs/promises` for OpenAPI/HTML docs
-* **CORS:** Permissive (allow all origins) for local development and testing
-* **Documentation UI:** Redoc served from `/docs`
+### 1. **Server (`server.js`)**
+- HTTP server using Node.js `http` module.
+- Handles routing, request parsing, and JSON responses.
+- Implements CORS support for cross-origin requests.
+- Routes are matched manually without a framework.
 
----
+### 2. **Routing**
+- `/health` → Health check endpoint.
+- `/tasks` → Create, read, update, delete tasks.
+- `/docs` → Serves API docs (Redoc UI).
+- `/openapi.yaml` → Serves the OpenAPI definition.
 
-## Request Flow
+### 3. **Data Layer**
+- JSON file storage located in `data/tasks.json`.
+- Synchronous read/write for simplicity (demo purposes).
+- Each task object contains:
+  - `id`: String (timestamp-based unique ID)
+  - `title`: String (required)
+  - `due`: Date in `YYYY-MM-DD` format (required)
+  - `completed`: Boolean (default `false`)
 
-1. **Entry Point**
+### 4. **Documentation**
+- OpenAPI 3.0 YAML (`openapi.yaml`) fully describes the API.
+- Served at `/openapi.yaml` and visualized via `/docs`.
+- Linting via `@redocly/cli`.
 
-   * `server.js` is the main file.
-   * `createServer()` sets up and returns the HTTP server instance.
-   * When run directly via `node server.js`, it listens on `PORT` (default `3000`).
+### 5. **Testing**
+- Uses Node.js built-in `node:test` and `assert` modules.
+- Coverage via `nyc`.
+- Tests cover all endpoints, including edge cases.
 
-2. **Routing**
-
-   * **`GET /health`** → Returns `{ "status": "ok" }` for uptime checks.
-   * **`GET /tasks`** → Returns all tasks.
-   * **`POST /tasks`** → Adds a new task from JSON body (`title`, optional `due`).
-   * **`GET /tasks/{id}`** → Returns a single task.
-   * **`PUT /tasks/{id}`** → Updates task’s `title`, `due`, or `completed` status.
-   * **`DELETE /tasks/{id}`** → Removes a task.
-   * **`GET /docs`** → Serves Redoc HTML UI.
-   * **`GET /openapi.yaml`** → Serves raw OpenAPI spec.
-
-3. **JSON Body Parsing**
-
-   * Manual parsing via streamed request body.
-   * Invalid or non-JSON bodies → `400 Bad Request`.
-
-4. **Error Handling**
-
-   * Client errors (invalid input, missing task) → `400` / `404`
-   * Server errors (unexpected exceptions) → `500 Internal Server Error`
-
----
-
-## File Structure
-
-```
-tiny-tasks-api/
-├── server.js         # HTTP server & routing
-├── openapi.yaml      # API specification (OpenAPI 3.0)
-├── openapi.html      # Prebuilt Redoc UI
-├── architecture.md   # This file
-├── README.md         # Project overview and usage
-└── tests/            # Automated tests for all endpoints
-```
+### 6. **CI/CD**
+- GitHub Actions workflows for:
+  - CI (install, lint, test)
+  - OpenAPI linting
+  - Coverage reporting (Codecov)
 
 ---
 
-## Extensibility Roadmap
+## Decisions & Trade-offs
 
-Short-term:
-
-* Add pagination & filtering to `GET /tasks`
-* Add partial updates with `PATCH`
-* Add request validation against OpenAPI spec
-
-Mid-term:
-
-* Persist tasks to JSON, SQLite, or Redis
-* Split routing and handlers into separate modules
-* Add environment-based configuration
-
-Long-term:
-
-* Implement API key or JWT authentication
-* Add rate limiting and logging middleware
-* Deploy with Docker or serverless platforms
+- **Node core only** – maximizes portability, demonstrates low-level Node.js skills; trades off convenience of frameworks like Express.
+- **JSON file store** – great for demos and small workloads; not suitable for production concurrency or scaling.
+- **No authentication** – simplifies demo; not secure for real deployments.
+- **OpenAPI docs built-in** – ensures docs are always in sync with the API.
 
 ---
 
-Do you want me to now **also restructure your README** so this `architecture.md` isn’t bloating it, and the README focuses just on usage and quick start? That would make it much cleaner.
+## Non-Goals
+
+- High-availability clustering or database scaling.
+- Advanced error semantics beyond basic JSON error objects.
+- Role-based access control or user management.
+
+---
+
+## Future Improvements
+
+- Pluggable storage backends (SQLite, Postgres).
+- JWT or API key authentication.
+- Pagination and filtering on `GET /tasks`.
+- More robust validation (e.g., JSON Schema).
