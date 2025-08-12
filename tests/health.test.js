@@ -1,11 +1,19 @@
 // tests/health.test.js
-const test = require('node:test');
-const assert = require('node:assert');
+const { test } = require('node:test');
+const assert = require('node:assert/strict');
+const http = require('node:http');
 const request = require('supertest');
-const app = require('../server.js');
+const { createApp } = require('../server.js');
 
 test('GET /health returns 200 and { status: "ok" }', async () => {
-  const res = await request(app).get('/health');
-  assert.strictEqual(res.status, 200);
-  assert.deepStrictEqual(res.body, { status: 'ok' });
+  const server = http.createServer(createApp());
+  try {
+    await request(server)
+      .get('/health')
+      .expect(200)
+      .expect('Content-Type', /json/)
+      .expect({ status: 'ok' });
+  } finally {
+    server.close();
+  }
 });

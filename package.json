@@ -1,16 +1,35 @@
-"scripts": {
-  "start": "node server.js",
-  "lint": "eslint .",
-  "lint:fix": "eslint . --fix",
-  "test": "node --test",
-  "coverage": "nyc npm test"
-},
-
+{
   "name": "tiny-tasks-api",
   "version": "1.0.0",
-  "description": "A minimal REST API for managing tasks using only Node.js core modules.",
-  "main": "server.js",
-  "scripts": { "start": "node server.js" },
+  "description": "Minimal Node.js REST API for tiny tasks with OpenAPI docs.",
   "license": "MIT",
-  "private": true
+  "private": false,
+  "main": "server.js",
+  "engines": {
+    "node": ">=20 <23"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "test": "node --test",
+    "coverage": "nyc npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jvnadelberg2/tiny-tasks-api.git"
+  },
+  "keywords": [
+    "api",
+    "node",
+    "openapi",
+    "rest"
+  ],
+  "author": "",
+  "devDependencies": {
+    "eslint": "^9.33.0",
+    "nyc": "^15.1.0",
+    "prettier": "^3.6.2",
+    "supertest": "^7.1.4"
+  }
 }

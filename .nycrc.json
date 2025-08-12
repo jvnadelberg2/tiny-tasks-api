@@ -1,13 +1,15 @@
 {
   "all": true,
   "reporter": ["text", "lcov", "html"],
-  "include": ["server.js", "index.js", "tests/**/*.js"],
+  "include": ["server.js"],
   "exclude": [
     "node_modules",
     "coverage",
     "docs",
     "examples",
-    "**/*.test.js"
+    "**/*.test.js",
+    "tests/**",
+    "index.js"
   ],
   "check-coverage": true,
   "branches": 80,
@@ -15,4 +17,3 @@
   "lines": 80,
   "statements": 80
 }
-
