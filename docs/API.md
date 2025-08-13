@@ -1,158 +1,109 @@
 # API Reference
 
-Base URL: `http://localhost:3000`  
-The canonical source of truth for the API is [`openapi.yaml`](../openapi.yaml).
-
----
+Base URL: `http://localhost:3000`
+Canonical source: [`openapi.yaml`](../openapi.yaml)
 
 ## Health
 
-**GET** `/health` → `200 OK`  
-**Purpose:** Verify the API is up.
+GET `/health` → 200 OK
+Purpose: Verify the API is running.
 
-**Response:**
-```json
-{ "status": "ok" }
-```
-
----
+Response:
+    {
+      "status": "ok"
+    }
 
 ## Tasks
 
 ### List tasks
 
-**GET** `/tasks` → `200 OK`
+GET `/tasks` → 200 OK
 
-**Response:**
-```json
-[
-  {
-    "id": "1754922040132",
-    "title": "demo task",
-    "due": "2025-12-31",
-    "completed": false
-  }
-]
-```
-
----
+Response:
+    [
+      {
+        "id": "1754922040132",
+        "title": "demo task",
+        "due": "2025-12-31",
+        "completed": false
+      }
+    ]
 
 ### Create task
 
-**POST** `/tasks` → `201 Created`  
-**Request body (JSON):**
-```json
-{
-  "title": "demo task",
-  "due": "2025-12-31"
-}
-```
+POST `/tasks` → 201 Created
+Request body (JSON):
+    {
+      "title": "demo task",
+      "due": "2025-12-31"
+    }
 
-**Response:**
-```json
-{
-  "id": "1754922040132",
-  "title": "demo task",
-  "due": "2025-12-31",
-  "completed": false
-}
-```
+Response:
+    {
+      "id": "1754922040132",
+      "title": "demo task",
+      "due": "2025-12-31",
+      "completed": false
+    }
 
-**Errors:**
-- `400 Bad Request` — invalid or missing fields:
-  ```json
-  { "error": "Invalid request body" }
-  ```
-
----
+Errors:
+    { "error": "Invalid request body" }
 
 ### Get task by ID
 
-**GET** `/tasks/{id}` → `200 OK`
+GET `/tasks/{id}` → 200 OK
 
-**Response:**
-```json
-{
-  "id": "1754922040132",
-  "title": "demo task",
-  "due": "2025-12-31",
-  "completed": false
-}
-```
+Response:
+    {
+      "id": "1754922040132",
+      "title": "demo task",
+      "due": "2025-12-31",
+      "completed": false
+    }
 
-**Errors:**
-- `404 Not Found` — task does not exist:
-  ```json
-  { "error": "Task not found" }
-  ```
-
----
+Errors:
+    { "error": "Task not found" }
 
 ### Update task
 
-**PUT** `/tasks/{id}` → `200 OK`  
-**Request body (JSON):**
-```json
-{
-  "title": "updated task title",
-  "due": "2025-12-31",
-  "completed": true
-}
-```
+PUT `/tasks/{id}` → 200 OK
+Request body (JSON):
+    {
+      "title": "updated task title",
+      "due": "2025-12-31",
+      "completed": true
+    }
 
-**Unset due date (either of these):**
-```json
-{ "due": null }
-```
-```json
-{ "due": "" }
-```
+Unset due date (either of these):
+    { "due": null }
+    { "due": "" }
 
-**Response:**
-```json
-{
-  "id": "1754922040132",
-  "title": "updated task title",
-  "due": "2025-12-31",
-  "completed": true
-}
-```
+Response:
+    {
+      "id": "1754922040132",
+      "title": "updated task title",
+      "due": "2025-12-31",
+      "completed": true
+    }
 
-**Errors:**
-- `400 Bad Request` — invalid body:
-  ```json
-  { "error": "Invalid request body" }
-  ```
-- `404 Not Found` — task does not exist:
-  ```json
-  { "error": "Task not found" }
-  ```
-
----
+Errors:
+    { "error": "Invalid request body" }
+    { "error": "Task not found" }
 
 ### Delete task
 
-**DELETE** `/tasks/{id}` → `204 No Content`
+DELETE `/tasks/{id}` → 204 No Content
 
-**Errors:**
-- `404 Not Found` — task does not exist:
-  ```json
-  { "error": "Task not found" }
-  ```
-
----
+Errors:
+    { "error": "Task not found" }
 
 ## Method Not Allowed
 
-If an unsupported HTTP method is used for a valid path:
-```json
-{ "error": "Method not allowed" }
-```
-
----
+If an unsupported HTTP method is used on a valid path:
+    { "error": "Method not allowed" }
 
 ## Notes
 
-- All dates use `YYYY-MM-DD` format for `due`.
-- This is a demo API; data is stored in-memory and resets when the server restarts.
-- Schema definitions are in [`openapi.yaml`](../openapi.yaml).
+- Dates use `YYYY-MM-DD` for `due`.
+- Data is stored in-memory; restarts clear all tasks.
+- See [`openapi.yaml`](../openapi.yaml) for full schemas.

@@ -2,77 +2,81 @@
 
 ## Overview
 
-The Tiny Tasks API is a minimal REST API built entirely with Node.js core modules. It demonstrates professional software engineering and technical writing practices without relying on frameworks like Express. The application provides CRUD operations for tasks, serves built-in API documentation, and includes automated tests, linting, and CI/CD integration.
-
-The design prioritizes:
-- Simplicity
-- Portability
-- Educational value
-- Documentation completeness
-
----
+    Tiny Tasks API is a small HTTP service implemented with Node.js core modules only.
+    It provides CRUD operations for a simple Task resource and a health endpoint.
+    Data is stored in-memory and resets when the process restarts.
 
 ## Components
 
-### 1. **Server (`server.js`)**
-- HTTP server using Node.js `http` module.
-- Handles routing, request parsing, and JSON responses.
-- Implements CORS support for cross-origin requests.
-- Routes are matched manually without a framework.
+    HTTP layer
+        node:http createServer is used to accept connections and handle requests
+        a single request handler inspects URL and method to dispatch to routes
 
-### 2. **Routing**
-- `/health` → Health check endpoint.
-- `/tasks` → Create, read, update, delete tasks.
-- `/docs` → Serves API docs (Redoc UI).
-- `/openapi.yaml` → Serves the OpenAPI definition.
+    Routing
+        GET  /health            service liveness
+        GET  /tasks             list tasks
+        POST /tasks             create task
+        GET  /tasks/{id}        get task by id
+        PUT  /tasks/{id}        update task by id
+        DELETE /tasks/{id}      delete task by id
 
-### 3. **Data Layer**
-- JSON file storage located in `data/tasks.json`.
-- Synchronous read/write for simplicity (demo purposes).
-- Each task object contains:
-  - `id`: String (timestamp-based unique ID)
-  - `title`: String (required)
-  - `due`: Date in `YYYY-MM-DD` format (required)
-  - `completed`: Boolean (default `false`)
+    Storage
+        in-memory Map keyed by task id
+        task shape: id (string), title (string), due (YYYY-MM-DD), completed (boolean)
 
-### 4. **Documentation**
-- OpenAPI 3.0 YAML (`openapi.yaml`) fully describes the API.
-- Served at `/openapi.yaml` and visualized via `/docs`.
-- Linting via `@redocly/cli`.
+    Validation
+        JSON request bodies are parsed manually
+        basic checks ensure title is present and due is a valid YYYY-MM-DD date
+        update accepts partial fields; due can be cleared with null or empty string
 
-### 5. **Testing**
-- Uses Node.js built-in `node:test` and `assert` modules.
-- Coverage via `nyc`.
-- Tests cover all endpoints, including edge cases.
+    Error model
+        all errors return a JSON object with an "error" string
+        common responses: 400 Invalid request body, 404 Task not found, 405 Method not allowed
 
-### 6. **CI/CD**
-- GitHub Actions workflows for:
-  - CI (install, lint, test)
-  - OpenAPI linting
-  - Coverage reporting (Codecov)
+    Graceful shutdown
+        the process handles SIGINT and SIGTERM and closes the HTTP server before exit
 
----
+## Identifier generation
 
-## Decisions & Trade-offs
+    ids are timestamp-based strings created at task creation time
 
-- **Node core only** – maximizes portability, demonstrates low-level Node.js skills; trades off convenience of frameworks like Express.
-- **JSON file store** – great for demos and small workloads; not suitable for production concurrency or scaling.
-- **No authentication** – simplifies demo; not secure for real deployments.
-- **OpenAPI docs built-in** – ensures docs are always in sync with the API.
+## OpenAPI specification
 
----
+    openapi.yaml at repo root documents the API surface
+    static HTML (openapi.html) renders the spec for browsing
+    if the server exposes docs routes, /docs serves openapi.html and /openapi.yaml serves the spec
 
-## Non-Goals
+## Data model
 
-- High-availability clustering or database scaling.
-- Advanced error semantics beyond basic JSON error objects.
-- Role-based access control or user management.
+    Task
+        id          string
+        title       string
+        due         string (YYYY-MM-DD)
+        completed   boolean
 
----
+## Decisions and trade-offs
 
-## Future Improvements
+    Node core only
+        avoids external framework dependencies, keeps the code small and portable
+        trades off convenience middleware and plugins
 
-- Pluggable storage backends (SQLite, Postgres).
-- JWT or API key authentication.
-- Pagination and filtering on `GET /tasks`.
-- More robust validation (e.g., JSON Schema).
+    In-memory storage
+        simple and deterministic for demos and tests
+        not durable, not concurrent-safe across processes
+
+    No authentication
+        reduces complexity for a minimal example
+        not suitable for production use
+
+## Non-goals
+
+    high availability or clustering
+    persistent database integration
+    role-based access control
+
+## Future improvements
+
+    pluggable storage backend (e.g., JSON file, SQLite, Postgres)
+    input validation via JSON Schema
+    pagination and filtering on GET /tasks
+    structured request logging and basic metrics
