@@ -6,8 +6,17 @@
 ![Node](https://img.shields.io/badge/node-20.x-brightgreen?logo=node.js)
 [![License](https://img.shields.io/github/license/jvnadelberg2/tiny-tasks-api)](LICENSE)
 
+Minimal, dependency-light Node.js REST API for managing tiny tasks, with OpenAPI-powered docs and a clean repo structure.
 
-Minimal, dependency-light Node.js REST API for managing tiny tasks, with OpenAPI-powered docs and a clean, interview-ready repo structure.
+---
+
+## About
+
+A small demonstration API showing:
+- Pure Node.js HTTP server (no external frameworks)
+- Simple in-memory task storage
+- CRUD endpoints for `/tasks`
+- OpenAPI 3.0.3 specification (`openapi.yaml`) and HTML rendering
 
 ---
 
@@ -28,90 +37,3 @@ npm run coverage
 # 4) Run
 npm start
 # → http://localhost:3000
-```
-
-**Smoke check:**
-```bash
-curl -s http://localhost:3000/health | jq
-# { "status": "ok" }
-```
-
-**One-liner:**
-```bash
-npm ci && npm run lint && npm test && npm start
-```
-
----
-
-## API Overview
-
-Base URL: `http://localhost:3000`  
-Endpoints and request/response examples are documented here: **[docs/API.md](./docs/API.md)**.  
-OpenAPI spec: **[openapi.yaml](./openapi.yaml)**  
-Rendered HTML: **open `openapi.html`** or `docs/site/openapi.html` in a browser.
-
----
-
-## Documentation Map
-
-- [`docs/API.md`](./docs/API.md) — full endpoint reference and examples
-- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md)
-- [`docs/OPERATIONS.md`](./docs/OPERATIONS.md)
-- [`docs/TROUBLESHOOTING.md`](./docs/TROUBLESHOOTING.md)
-- [`docs/SECURITY.md`](./docs/SECURITY.md)
-- [`docs/FAQ.md`](./docs/FAQ.md)
-- [`docs/CHANGELOG.md`](./docs/CHANGELOG.md)
-- [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md)
-
----
-
-## Development
-
-Requirements:
-- Node.js 20 (see [`.nvmrc`](./.nvmrc))
-
-Conventions:
-- Lint: `npm run lint` (`.eslintrc.json`)
-- Format: Prettier (`.prettierrc`)
-- Editor settings: `.editorconfig`
-
-Scripts:
-```json
-{
-  "start": "node server.js",
-  "lint": "eslint .",
-  "lint:fix": "eslint . --fix",
-  "test": "node --test",
-  "coverage": "nyc npm test"
-}
-```
-
----
-
-## Testing & Coverage
-
-- Test runner: Node’s built-in test runner (`node --test`)
-- Coverage via `nyc` (Istanbul). Config: [`.nycrc.json`](./.nycrc.json)
-
-CI runs:
-- Lint
-- Tests on Node 18/20/22
-- Coverage upload (Codecov) — add `CODECOV_TOKEN` to repo secrets to enable badge
-
----
-
-## Contributing
-
-See [`docs/CONTRIBUTING.md`](./docs/CONTRIBUTING.md).
-
-## Security
-
-See [`docs/SECURITY.md`](./docs/SECURITY.md).
-
-## License
-
-MIT — see [`LICENSE`](./LICENSE).
-
-## Project Status
-
-Maintained as a compact, production-adjacent demo suitable for code/doc reviews.

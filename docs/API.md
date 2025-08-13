@@ -1,8 +1,6 @@
 # API Reference
 
 Base URL: `http://localhost:3000`  
-
-This document provides detailed information on all endpoints, including methods, parameters, request bodies, and response formats.  
 The canonical source of truth for the API is [`openapi.yaml`](../openapi.yaml).
 
 ---
@@ -14,16 +12,16 @@ The canonical source of truth for the API is [`openapi.yaml`](../openapi.yaml).
 
 **Response:**
 ```json
-{
-  "status": "ok"
-}
+{ "status": "ok" }
 ```
 
 ---
 
-## List Tasks
+## Tasks
 
-**GET** `/tasks` → `200 OK`  
+### List tasks
+
+**GET** `/tasks` → `200 OK`
 
 **Response:**
 ```json
@@ -39,11 +37,10 @@ The canonical source of truth for the API is [`openapi.yaml`](../openapi.yaml).
 
 ---
 
-## Create Task
+### Create task
 
 **POST** `/tasks` → `201 Created`  
-
-**Request Body (JSON):**
+**Request body (JSON):**
 ```json
 {
   "title": "demo task",
@@ -61,17 +58,17 @@ The canonical source of truth for the API is [`openapi.yaml`](../openapi.yaml).
 }
 ```
 
+**Errors:**
+- `400 Bad Request` — invalid or missing fields:
+  ```json
+  { "error": "Invalid request body" }
+  ```
+
 ---
 
-## Get Task by ID
+### Get task by ID
 
-**GET** `/tasks/{id}` → `200 OK`  
-Returns the specified task.
-
-**Example:**
-```bash
-curl http://localhost:3000/tasks/1754922040132
-```
+**GET** `/tasks/{id}` → `200 OK`
 
 **Response:**
 ```json
@@ -83,19 +80,32 @@ curl http://localhost:3000/tasks/1754922040132
 }
 ```
 
+**Errors:**
+- `404 Not Found` — task does not exist:
+  ```json
+  { "error": "Task not found" }
+  ```
+
 ---
 
-## Update Task
+### Update task
 
 **PUT** `/tasks/{id}` → `200 OK`  
-
-**Request Body (JSON):**
+**Request body (JSON):**
 ```json
 {
   "title": "updated task title",
   "due": "2025-12-31",
   "completed": true
 }
+```
+
+**Unset due date (either of these):**
+```json
+{ "due": null }
+```
+```json
+{ "due": "" }
 ```
 
 **Response:**
@@ -108,46 +118,41 @@ curl http://localhost:3000/tasks/1754922040132
 }
 ```
 
----
-
-## Delete Task
-
-**DELETE** `/tasks/{id}` → `204 No Content`  
-
-Deletes the specified task. Returns no body.
-
----
-
-## Error Model
-
-All error responses follow a consistent format:
-
-```json
-{
-  "error": "Human-readable error message"
-}
-```
-
-**Examples:**
-
+**Errors:**
+- `400 Bad Request` — invalid body:
+  ```json
+  { "error": "Invalid request body" }
+  ```
 - `404 Not Found` — task does not exist:
-```json
-{
-  "error": "Task not found"
-}
-```
+  ```json
+  { "error": "Task not found" }
+  ```
 
-- `400 Bad Request` — invalid JSON body:
+---
+
+### Delete task
+
+**DELETE** `/tasks/{id}` → `204 No Content`
+
+**Errors:**
+- `404 Not Found` — task does not exist:
+  ```json
+  { "error": "Task not found" }
+  ```
+
+---
+
+## Method Not Allowed
+
+If an unsupported HTTP method is used for a valid path:
 ```json
-{
-  "error": "Invalid request body"
-}
+{ "error": "Method not allowed" }
 ```
 
 ---
 
 ## Notes
 
-- All timestamps use ISO 8601 date format (`YYYY-MM-DD` for due dates).  
-- This is a demo API; data is stored in-memory and resets when the server restarts.  
-- For schema definitions, see [`open]()
+- All dates use `YYYY-MM-DD` format for `due`.
+- This is a demo API; data is stored in-memory and resets when the server restarts.
+- Schema definitions are in [`openapi.yaml`](../openapi.yaml).
