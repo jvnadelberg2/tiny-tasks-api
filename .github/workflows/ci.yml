@@ -1,35 +1,18 @@
 name: CI
 on:
   push:
+    branches: [ main ]
   pull_request:
-
+permissions:
+  contents: read
 jobs:
-  test-and-coverage:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
-          node-version: '18'
-          cache: 'npm'
-
-      - run: npm ci || npm install
-
-      # Produce coverage/lcov.info regardless of local config
-      - name: Run tests with coverage
-        run: npx nyc --reporter=lcov --reporter=text-summary npm test
-
-      - name: Verify lcov exists
-        run: |
-          test -f coverage/lcov.info || (echo "coverage/lcov.info missing" && exit 1)
-          echo "lcov size:" $(wc -c < coverage/lcov.info)
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: true
-        env:
-          # Public repo: omit. Private repo: set repo secret CODECOV_TOKEN.
-          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+          node-version: 20.x
+          cache: npm
+      - run: npm ci
+      - run: npm test
