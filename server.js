@@ -1,150 +1,159 @@
 // server.js
-// Tiny Tasks API — pure Node.js HTTP server with in-memory store + docs routes.
-// Exports:
-//   - createApp(): request handler function (for tests)
-//   - start(port): starts http.Server and returns it (for prod/dev)
+// Tiny Tasks API — pure Node.js HTTP server with in-memory store + docs routes (Redoc & Swagger)
+// - No dependencies
+// - Supports both /tasks and /v1/tasks
+// - Serves openapi.yaml at /openapi.yaml, plus relative compatibility at /docs/openapi.yaml and /swagger-docs/openapi.yaml
+// Run: node server.js
 
 const { createServer } = require('node:http');
 const { URL } = require('node:url');
 const { readFile } = require('node:fs/promises');
-const { extname, join } = require('node:path');
+const { join, extname } = require('node:path');
 
 const ROOT = __dirname;
+const API_PREFIX = '/v1';
 
-// In-memory store (demo)
+// In-memory store
 const tasks = new Map(); // id -> { id, title, due, completed }
 
-// Helpers
+// ---------------- helpers ----------------
 function send(res, status, body = '', headers = {}) {
   res.statusCode = status;
+  // CORS defaults
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS,HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   for (const [k, v] of Object.entries(headers)) res.setHeader(k, v);
-  if (body && typeof body !== 'string' && !Buffer.isBuffer(body)) {
-    body = String(body);
-  }
+  if (body && typeof body !== 'string' && !Buffer.isBuffer(body)) body = String(body);
   res.end(body);
 }
 
-function json(res, status, body) {
-  if (body == null) return send(res, status, '');
-  return send(res, status, JSON.stringify(body), { 'content-type': 'application/json; charset=utf-8' });
+function json(res, status, obj) {
+  if (obj == null) return send(res, status, '');
+  return send(res, status, JSON.stringify(obj), { 'content-type': 'application/json; charset=utf-8' });
 }
 
-function notFound(res, msg = 'Not found') {
-  return json(res, 404, { error: msg });
-}
+function notFound(res, msg = 'Not found') { return json(res, 404, { error: msg }); }
+function badRequest(res, msg = 'Invalid request body') { return json(res, 400, { error: msg }); }
+function methodNotAllowed(res) { return json(res, 405, { error: 'Method not allowed' }); }
 
-function badRequest(res, msg = 'Invalid request body') {
-  return json(res, 400, { error: msg });
-}
-
-function methodNotAllowed(res) {
-  return json(res, 405, { error: 'Method not allowed' });
-}
+const INVALID_JSON = Symbol('INVALID_JSON');
 
 function parseBody(req) {
   return new Promise((resolve) => {
     let data = '';
-    req.on('data', (chunk) => (data += chunk));
-    req.on('end', () => {
-      if (!data) return resolve({}); // treat empty body as {}
-      try {
-        resolve(JSON.parse(data));
-      } catch {
-        resolve(Symbol.for('INVALID_JSON'));
+    req.on('data', c => {
+      data += c;
+      if (data.length > 1e6) { // 1MB guard
+        try { req.destroy(); } catch {}
+        return resolve(INVALID_JSON);
       }
     });
-    req.on('error', () => resolve(Symbol.for('INVALID_JSON')));
+    req.on('end', () => {
+      if (!data) return resolve({});
+      try { resolve(JSON.parse(data)); } catch { resolve(INVALID_JSON); }
+    });
+    req.on('error', () => resolve(INVALID_JSON));
   });
 }
 
 function isValidDateYYYYMMDD(s) {
-  if (typeof s !== 'string') return false;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
+  if (typeof s !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(s)) return false;
   const t = new Date(s + 'T00:00:00Z');
-  return !isNaN(t.getTime());
+  return !Number.isNaN(t.getTime());
 }
 
-async function serveStatic(res, filePath) {
-  // Minimal, safe static file serving for docs assets we explicitly allow.
+async function serveStatic(res, filePath, method = 'GET') {
   const allowed = new Set([
     join(ROOT, 'openapi.html'),
+    join(ROOT, 'swagger.html'),
     join(ROOT, 'openapi.yaml'),
-    join(ROOT, 'docs', 'site', 'openapi.html'), // optional secondary location
+    join(ROOT, 'docs', 'site', 'openapi.html'), // optional extra if you have it
   ]);
   if (!allowed.has(filePath)) return notFound(res, 'Not found');
 
   let content;
-  try {
-    content = await readFile(filePath);
-  } catch {
-    return notFound(res, 'Not found');
-  }
+  try { content = await readFile(filePath); }
+  catch { return notFound(res, 'Not found'); }
 
   const ext = extname(filePath);
   const ct =
-    ext === '.html'
-      ? 'text/html; charset=utf-8'
-      : ext === '.yaml' || ext === '.yml'
-      ? 'application/yaml; charset=utf-8'
-      : 'application/octet-stream';
-  return send(res, 200, content, { 'content-type': ct });
+    ext === '.html' ? 'text/html; charset=utf-8'
+    : (ext === '.yaml' || ext === '.yml') ? 'application/yaml; charset=utf-8'
+    : 'application/octet-stream';
+
+  res.statusCode = 200;
+  res.setHeader('content-type', ct);
+  res.setHeader('content-length', content.length);
+  if (method === 'HEAD') return res.end();
+  return res.end(content);
 }
 
+// ---------------- app ----------------
 function createApp() {
   return async (req, res) => {
-    const { method } = req;
-    const url = new URL(req.url, 'http://localhost');
-    const pathname = url.pathname;
+    // CORS preflight
+    if (req.method === 'OPTIONS') {
+      return send(res, 204, '');
+    }
 
-    // Health
+    const url = new URL(req.url, 'http://localhost');
+    const { pathname } = url;
+    const method = req.method;
+
+    // health
     if (pathname === '/health') {
       if (method !== 'GET') return methodNotAllowed(res);
       return json(res, 200, { status: 'ok' });
     }
 
-    // Docs
+    // docs pages (serve your local HTML files)
     if (pathname === '/docs') {
-      if (method !== 'GET') return methodNotAllowed(res);
-      // Prefer root openapi.html if present
-      const file = join(ROOT, 'openapi.html');
-      return serveStatic(res, file);
+      if (method !== 'GET' && method !== 'HEAD') return methodNotAllowed(res);
+      return serveStatic(res, join(ROOT, 'openapi.html'), method);
+    }
+    if (pathname === '/swagger-docs' || pathname === '/swagger.html') {
+      if (method !== 'GET' && method !== 'HEAD') return methodNotAllowed(res);
+      return serveStatic(res, join(ROOT, 'swagger.html'), method);
     }
 
-    if (pathname === '/openapi.html') {
-      if (method !== 'GET') return methodNotAllowed(res);
-      return serveStatic(res, join(ROOT, 'openapi.html'));
-    }
-
+    // OpenAPI spec (absolute path)
     if (pathname === '/openapi.yaml') {
-      if (method !== 'GET') return methodNotAllowed(res);
-      return serveStatic(res, join(ROOT, 'openapi.yaml'));
+      if (method !== 'GET' && method !== 'HEAD') return methodNotAllowed(res);
+      return serveStatic(res, join(ROOT, 'openapi.yaml'), method);
+    }
+    // Compatibility for relative fetches from /docs and /swagger-docs
+    if (pathname === '/docs/openapi.yaml' || pathname === '/swagger-docs/openapi.yaml') {
+      if (method !== 'GET' && method !== 'HEAD') return methodNotAllowed(res);
+      return serveStatic(res, join(ROOT, 'openapi.yaml'), method);
     }
 
-    // Tasks collection
-    if (pathname === '/tasks') {
+    // tasks collection — support /tasks and /v1/tasks
+    if (pathname === '/tasks' || pathname === `${API_PREFIX}/tasks`) {
       if (method === 'GET') {
         return json(res, 200, Array.from(tasks.values()));
       }
-
       if (method === 'POST') {
         const body = await parseBody(req);
-        if (body === Symbol.for('INVALID_JSON')) return badRequest(res, 'Invalid request body');
-
+        if (body === INVALID_JSON) return badRequest(res, 'Invalid request body');
         const { title, due, completed = false } = body || {};
         if (!title || !due || !isValidDateYYYYMMDD(due)) return badRequest(res, 'Invalid request body');
 
         const id = String(Date.now());
         const task = { id, title, due, completed: Boolean(completed) };
         tasks.set(id, task);
+
+        // 201 + Location
+        res.setHeader('Location', `${pathname}/${id}`);
         return json(res, 201, task);
       }
-
       return methodNotAllowed(res);
     }
 
-    // Task by ID
-    if (pathname.startsWith('/tasks/')) {
-      const id = pathname.slice('/tasks/'.length);
+    // task by id — support /tasks/:id and /v1/tasks/:id
+    if (pathname.startsWith('/tasks/') || pathname.startsWith(`${API_PREFIX}/tasks/`)) {
+      const base = pathname.startsWith('/tasks/') ? '/tasks/' : `${API_PREFIX}/tasks/`;
+      const id = pathname.slice(base.length);
       if (!id) return notFound(res, 'Not found');
 
       if (method === 'GET') {
@@ -154,12 +163,10 @@ function createApp() {
 
       if (method === 'PUT') {
         const body = await parseBody(req);
-        if (body === Symbol.for('INVALID_JSON')) return badRequest(res, 'Invalid request body');
-
+        if (body === INVALID_JSON) return badRequest(res, 'Invalid request body');
         const t = tasks.get(id);
         if (!t) return notFound(res, 'Task not found');
 
-        // Accept partial updates but enforce basic validation where provided
         if ('title' in body) {
           if (!body.title) return badRequest(res, 'Invalid request body');
           t.title = body.title;
@@ -189,24 +196,20 @@ function createApp() {
       return methodNotAllowed(res);
     }
 
-    // Fallback
+    // fallback
     return notFound(res, 'Route not found');
   };
 }
 
+// ---------------- start ----------------
 function start(port = process.env.PORT ? Number(process.env.PORT) : 3000) {
-  const handler = createApp();
-  const server = createServer(handler);
+  const server = createServer(createApp());
   server.listen(port, () => {
     console.log(`Tiny Tasks API listening on http://localhost:${port}`);
   });
   return server;
 }
 
-// If run directly: start the server
-if (require.main === module) {
-  start();
-}
+if (require.main === module) start();
 
-// For tests and embedding
 module.exports = { createApp, start };

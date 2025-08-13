@@ -6,13 +6,16 @@
 ![Node](https://img.shields.io/badge/node-20.x-brightgreen?logo=node.js)
 [![License](https://img.shields.io/github/license/jvnadelberg2/tiny-tasks-api)](LICENSE)
 
-Minimal Node.js REST API for managing tiny tasks, using Node core modules only. Includes an OpenAPI 3.0 spec and a small docs set.
+Minimal Node.js REST API for managing tiny tasks, using Node core modules only. Includes OpenAPI docs and a small docs set.
 
 ## About
 
 - Pure `node:http` server (no Express)
 - Endpoints: `/health`, `/tasks`
-- OpenAPI spec at repo root (`openapi.yaml`), static HTML (`openapi.html`)
+- OpenAPI spec at repo root (`openapi.yaml`)
+- Static docs:
+  - Redoc: `/docs` (or open `openapi.html`)
+  - Swagger UI: `/swagger-docs` (or open `swagger.html`)
 
 ## Quickstart
 
@@ -21,13 +24,15 @@ npm ci
 npm start        # http://localhost:3000
 ```
 
-Docs in browser:
-- Open `openapi.html` (static Redoc)
-- Or visit `http://localhost:3000/docs` (if the server exposes docs routes)
+Verify docs are served:
 
-Example API usage:
 ```bash
-./examples/curl-quickstart.sh
+# Redoc
+curl -sS -o /dev/null -w '%{http_code}\n' http://localhost:3000/docs
+# Swagger UI
+curl -sS -o /dev/null -w '%{http_code}\n' http://localhost:3000/swagger-docs
+# Raw spec
+curl -sS -o /dev/null -w '%{http_code}\n' http://localhost:3000/openapi.yaml
 ```
 
 ## Endpoints (summary)
