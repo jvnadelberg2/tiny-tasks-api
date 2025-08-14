@@ -1,3 +1,4 @@
+```yaml
 name: CodeQL
 
 on:
@@ -35,7 +36,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
 
-      # For JS/TS, autobuild isn't necessary but harmless to keep.
+      # For JavaScript/TypeScript, autobuild is not strictly needed, but harmless.
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
 
@@ -43,3 +44,4 @@ jobs:
         uses: github/codeql-action/analyze@v3
         with:
           category: "/language:${{ matrix.language }}"
+```
