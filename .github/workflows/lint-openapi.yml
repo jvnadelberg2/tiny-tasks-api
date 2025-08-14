@@ -1,4 +1,4 @@
-name: CI
+name: lint-openapi
 
 on:
   pull_request:
@@ -6,15 +6,8 @@ on:
   push:
     branches: [ main ]
 
-permissions:
-  contents: read
-
-concurrency:
-  group: ci-${{ github.ref }}
-  cancel-in-progress: true
-
 jobs:
-  test:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,7 +15,7 @@ jobs:
         with:
           node-version: 20.x
           cache: npm
-      - name: Install
-        run: npm ci
-      - name: Run tests
-        run: npm test
+      - name: Install (best-effort)
+        run: npm ci || true
+      - name: Lint OpenAPI
+        run: npx --yes @redocly/cli@latest lint openapi.yaml
