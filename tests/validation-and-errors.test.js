@@ -1,17 +1,5 @@
-// tests/item1.validation-and-errors.test.js
-// Final coverage for Item 0 + Item 1 (aligned with compat server):
-// - /health OK
-// - Wrong content-type → 415 (use text/plain so Supertest doesn't auto-set JSON)
-// - Malformed JSON → 400
-// - Body size cap → 413 (no ECONNRESET)
-// - Near-cap success
-// - Validation errors (missing title, invalid due, title length)
-// - Unknown fields rejected (POST/PUT)
-// - Empty PUT rejected
-// - Happy path CRUD
-// - 404/405 with Allow headers
-// - Edge date cases
-// - LOG_JSON smoke
+// tests/validation-and-errors.test.js
+// Coverage for request/response correctness, validation, errors, and CORS/Allow headers.
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
