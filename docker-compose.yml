@@ -4,19 +4,17 @@ services:
       context: .
       target: prod
       args:
-        WITH_SQLITE: "0"     # set to "1" only if you want SQLite compiled in
+        WITH_SQLITE: "1"         # build image with better-sqlite3
     image: tiny-tasks:latest
     environment:
-      PORT: "3000"           # container listens on 3000
-      STORAGE: "json"        # memory | json | sqlite
-      TASKS_JSON_PATH: "/app/data/tasks.json"
-      # TASKS_SQLITE_PATH: "/app/data/tasks.db"   # if STORAGE=sqlite
-      # LOG_JSON: "1"                             # optional structured logs
+      PORT: "3000"
+      STORAGE: "sqlite"          # use SQLite storage
+      TASKS_SQLITE_PATH: "/app/data/tasks.db"
     volumes:
-      - tasks_data:/app/data
+      - tasks_data_sqlite:/app/data
     ports:
-      - "3001:3000"          # host 3001 → container 3000
+      - "3001:3000"              # publish host TCP 3001 → container TCP 3000
     restart: unless-stopped
 
 volumes:
-  tasks_data: {}
+  tasks_data_sqlite: {}

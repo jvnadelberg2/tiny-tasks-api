@@ -1,48 +1,42 @@
 # syntax=docker/dockerfile:1.7-labs
-# Multi-stage build with optional SQLite support.
 ARG NODE_VERSION=20-bullseye-slim
 FROM node:${NODE_VERSION} AS base
 WORKDIR /app
 
-# Healthcheck needs curl in the runtime image
+# Healthcheck needs curl
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
   && rm -rf /var/lib/apt/lists/*
 
-# -------- deps: install production deps (optionally build better-sqlite3) --------
+# -------- deps: install prod deps; optionally add better-sqlite3 --------
 FROM base AS deps
 ARG WITH_SQLITE=0
 COPY package.json package-lock.json* ./
-# Use npm ci if lockfile exists; otherwise fallback to npm i.
-RUN if [ -f package-lock.json ]; then \
-      if [ "$WITH_SQLITE" = "1" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*; \
-      fi; \
-      npm ci --omit=dev; \
-    else \
-      if [ "$WITH_SQLITE" = "1" ]; then \
-        apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*; \
-      fi; \
-      npm i --omit=dev; \
+RUN if [ -f package-lock.json ]; then npm ci --omit=dev; else npm i --omit=dev; fi
+# Optionally add SQLite without altering package.json/lock
+RUN if [ "$WITH_SQLITE" = "1" ]; then \
+      apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*; \
+      npm i --no-save --omit=dev better-sqlite3; \
     fi
 
-# -------- prod: small runtime image --------
+# -------- prod --------
 FROM base AS prod
 ENV NODE_ENV=production
 ENV PORT=3000
 ENV STORAGE=memory
-# Copy deps, then app
 COPY --from=deps --chown=node:node /app/node_modules ./node_modules
 COPY --chown=node:node . .
+# Ensure the data dir exists in the image and is owned by "node".
+# This ownership will be copied into a *new* named volume on first use.
+RUN mkdir -p /app/data && chown -R node:node /app/data
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=15s \
   CMD curl -fsS "http://localhost:${PORT}/health" || exit 1
 USER node
 CMD ["node", "server.js"]
 
-# -------- test: optional stage to run the test suite in-container --------
+# -------- test (optional) --------
 FROM base AS test
 COPY package.json package-lock.json* ./
 RUN if [ -f package-lock.json ]; then npm ci; else npm i; fi
 COPY . .
 CMD ["npm", "test"]
-

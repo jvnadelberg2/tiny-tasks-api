@@ -83,7 +83,7 @@ function readJsonBody(req, res, maxBytes = getMaxBodyBytes()) {
         tooLarge = true;
         // Stop accumulating; respond 413 without killing the socket
         req.off('data', onData);
-        req.on('data', () => {}); // drain remaining
+        req.on('data', () => { }); // drain remaining
         sendError(res, 413, 'Payload too large');
         rejectBody(new Error('PAYLOAD_TOO_LARGE'));
         return;
@@ -106,7 +106,7 @@ function readJsonBody(req, res, maxBytes = getMaxBodyBytes()) {
     });
 
     req.on('error', (err) => {
-      try { sendError(res, 400, 'Bad request'); } catch {}
+      try { sendError(res, 400, 'Bad request'); } catch { }
       rejectBody(err);
     });
   });
@@ -202,7 +202,7 @@ function validateUpdatePayload(body) {
 function nowMs() { return Date.now(); }
 function logJson(obj) {
   if (!logEnabled()) return;
-  try { process.stdout.write(JSON.stringify(obj) + '\n'); } catch {}
+  try { process.stdout.write(JSON.stringify(obj) + '\n'); } catch { }
 }
 
 /* ------------------------- Router ------------------------- */
@@ -483,7 +483,7 @@ function createServer() {
       try {
         sendError(res, 500, 'Internal server error');
         if (res.__log) res.__log({ error: 'uncaught', detail: String(e && e.message) });
-      } catch {}
+      } catch { }
     });
   });
 }
@@ -507,7 +507,7 @@ if (require.main === module) {
   if (logEnabled()) {
     try {
       process.stdout.write(JSON.stringify({ ts: new Date().toISOString(), msg: 'listening', port: DEFAULT_PORT }) + '\n');
-    } catch {}
+    } catch { }
   } else {
     // eslint-disable-next-line no-console
     console.log(`Tiny Tasks API listening on http://localhost:${DEFAULT_PORT} (storage=${STORAGE_DRIVER})`);
