@@ -187,7 +187,6 @@ function createStorage({ driver = 'memory', jsonPath, sqlitePath }) {
     return new SqliteStorage(file);
   }
   // Fallback to memory with a warning
-  // eslint-disable-next-line no-console
   console.warn(`Unknown STORAGE="${driver}", falling back to memory`);
   return new MemoryStorage();
 }

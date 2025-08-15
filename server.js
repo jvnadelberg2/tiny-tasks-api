@@ -509,7 +509,6 @@ if (require.main === module) {
       process.stdout.write(JSON.stringify({ ts: new Date().toISOString(), msg: 'listening', port: DEFAULT_PORT }) + '\n');
     } catch { }
   } else {
-    // eslint-disable-next-line no-console
     console.log(`Tiny Tasks API listening on http://localhost:${DEFAULT_PORT} (storage=${STORAGE_DRIVER})`);
   }
   process.on('SIGINT', () => server.close(() => process.exit(0)));

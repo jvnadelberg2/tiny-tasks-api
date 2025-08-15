@@ -27,7 +27,9 @@
   ],
   "author": "",
   "devDependencies": {
+    "@eslint/js": "^9.33.0",
     "eslint": "^9.33.0",
+    "globals": "^16.3.0",
     "nyc": "^15.1.0",
     "prettier": "^3.6.2",
     "supertest": "^7.1.4"
