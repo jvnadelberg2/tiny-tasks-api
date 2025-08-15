@@ -4,19 +4,27 @@ info:
   version: 1.0.0
   description: >
     Minimal task API with strict JSON handling, CORS, and optional persistence (memory/JSON/SQLite).
+  license:
+    name: MIT
 servers:
   - url: /
+# No auth required for any operation; satisfies Redocly "security-defined" rule
+security: []
 
 tags:
   - name: Tasks
+    description: CRUD operations for tasks
   - name: CORS
+    description: Preflight OPTIONS endpoints
   - name: Health
+    description: Liveness checks
 
 paths:
   /health:
     get:
       tags: [Health]
       summary: Health check
+      operationId: getHealth
       responses:
         '200':
           description: OK
@@ -24,6 +32,8 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Health' }
               example: { status: "ok" }
+        '400':
+          $ref: '#/components/responses/BadRequest'
         default:
           $ref: '#/components/responses/ErrorDefault'
 
@@ -31,6 +41,7 @@ paths:
     get:
       tags: [Tasks]
       summary: List tasks
+      operationId: listTasks
       responses:
         '200':
           description: Array of tasks
@@ -42,6 +53,8 @@ paths:
               example:
                 - { id: "tsk_001", title: "buy milk", due: "2025-12-31", completed: false }
                 - { id: "tsk_002", title: "send report", due: "2025-11-15", completed: true }
+        '400':
+          $ref: '#/components/responses/BadRequest'
         '405':
           $ref: '#/components/responses/MethodNotAllowedCollection'
         default:
@@ -50,6 +63,7 @@ paths:
     post:
       tags: [Tasks]
       summary: Create task
+      operationId: createTask
       requestBody:
         required: true
         content:
@@ -77,18 +91,23 @@ paths:
     options:
       tags: [CORS]
       summary: CORS preflight (collection)
+      operationId: optionsTasks
       responses:
         '200':
           description: OK (CORS headers present on response)
+        '400':
+          $ref: '#/components/responses/BadRequest'
         default:
           $ref: '#/components/responses/ErrorDefault'
 
   /tasks/{id}:
     parameters:
       - $ref: '#/components/parameters/TaskId'
+
     get:
       tags: [Tasks]
       summary: Get a task
+      operationId: getTask
       responses:
         '200':
           description: Task
@@ -107,6 +126,7 @@ paths:
       tags: [Tasks]
       summary: Update a task
       description: Provide any subset of fields; at least one is required.
+      operationId: updateTask
       requestBody:
         required: true
         content:
@@ -134,6 +154,7 @@ paths:
     delete:
       tags: [Tasks]
       summary: Delete a task
+      operationId: deleteTask
       responses:
         '204': { description: No Content }
         '404':
@@ -146,9 +167,12 @@ paths:
     options:
       tags: [CORS]
       summary: CORS preflight (item)
+      operationId: optionsTask
       responses:
         '200':
           description: OK (CORS headers present on response)
+        '400':
+          $ref: '#/components/responses/BadRequest'
         default:
           $ref: '#/components/responses/ErrorDefault'
 
