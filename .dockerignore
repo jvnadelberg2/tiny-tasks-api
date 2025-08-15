@@ -1,0 +1,26 @@
+# dependencies & caches
+node_modules
+npm-debug.log
+.yarn
+.pnpm-store
+
+# vcs
+.git
+.gitignore
+
+# build & coverage artifacts
+coverage
+*.tgz
+
+# local runtime data
+data
+
+# editor/OS junk
+.DS_Store
+.vscode
+.idea
+
+# docker files themselves (optional)
+Dockerfile
+docker-compose.yml
+

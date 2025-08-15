@@ -1,5 +1,13 @@
 extends:
   - recommended
+
 rules:
-  no-server-example.com: off
-  
+  # We don't need operationId for this tiny API
+  operation-operationId: off
+
+  # Don’t force contact/license metadata
+  info-contact: off
+  info-license: off
+
+  # Allow keeping helper components without failing the build
+  no-unused-components: warn
