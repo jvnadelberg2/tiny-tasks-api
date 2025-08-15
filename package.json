@@ -1,6 +1,6 @@
 {
   "name": "tiny-tasks-api",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Minimal Node.js REST API for tiny tasks with OpenAPI docs.",
   "license": "MIT",
   "private": false,
