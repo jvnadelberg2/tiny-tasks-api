@@ -6,6 +6,7 @@ info:
     Minimal task API with strict JSON handling, CORS, and optional persistence (memory/JSON/SQLite).
   license:
     name: MIT
+    url: https://opensource.org/license/mit
 servers:
   - url: /
 # No auth required for any operation; satisfies Redocly "security-defined" rule
@@ -291,7 +292,8 @@ components:
           description: Optional, defaults to false
       required: [title, due]
 
-    TaskUpdate:
+    # Base shape for updates
+    TaskUpdateBase:
       type: object
       additionalProperties: false
       properties:
@@ -305,10 +307,40 @@ components:
         completed:
           type: boolean
       description: At least one of title, due, or completed is required.
-      anyOf:
-        - required: [title]
-        - required: [due]
-        - required: [completed]
+
+    # Small helper schemas so "required" fields are defined in the same scope
+    TaskUpdateRequireTitle:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+
+    TaskUpdateRequireDue:
+      type: object
+      required: [due]
+      properties:
+        due:
+          type: string
+          format: date
+
+    TaskUpdateRequireCompleted:
+      type: object
+      required: [completed]
+      properties:
+        completed:
+          type: boolean
+
+    # Final "update" schema: base + (require title OR due OR completed)
+    TaskUpdate:
+      allOf:
+        - $ref: '#/components/schemas/TaskUpdateBase'
+        - anyOf:
+            - $ref: '#/components/schemas/TaskUpdateRequireTitle'
+            - $ref: '#/components/schemas/TaskUpdateRequireDue'
+            - $ref: '#/components/schemas/TaskUpdateRequireCompleted'
 
     Error:
       type: object
