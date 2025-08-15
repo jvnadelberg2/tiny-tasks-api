@@ -4,7 +4,6 @@ info:
   version: 1.0.0
   description: >
     Minimal task API with strict JSON handling, CORS, and optional persistence (memory/JSON/SQLite).
-
 servers:
   - url: /
 
@@ -24,9 +23,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Health' }
-              examples:
-                ok:
-                  value: { status: "ok" }
+              example: { status: "ok" }
         default:
           $ref: '#/components/responses/ErrorDefault'
 
@@ -42,6 +39,9 @@ paths:
               schema:
                 type: array
                 items: { $ref: '#/components/schemas/Task' }
+              example:
+                - { id: "tsk_001", title: "buy milk", due: "2025-12-31", completed: false }
+                - { id: "tsk_002", title: "send report", due: "2025-11-15", completed: true }
         '405':
           $ref: '#/components/responses/MethodNotAllowedCollection'
         default:
@@ -55,15 +55,14 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TaskCreate' }
-            examples:
-              ok:
-                value: { title: "buy milk", due: "2025-12-31", completed: false }
+            example: { title: "buy milk", due: "2025-12-31", completed: false }
       responses:
         '201':
           description: Created
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Task' }
+              example: { id: "tsk_abc123", title: "buy milk", due: "2025-12-31", completed: false }
         '400':
           $ref: '#/components/responses/BadRequest'
         '413':
@@ -96,6 +95,7 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Task' }
+              example: { id: "tsk_001", title: "buy milk", due: "2025-12-31", completed: false }
         '404':
           $ref: '#/components/responses/NotFound'
         '405':
@@ -112,15 +112,14 @@ paths:
         content:
           application/json:
             schema: { $ref: '#/components/schemas/TaskUpdate' }
-            examples:
-              setCompleted:
-                value: { completed: true }
+            example: { completed: true }
       responses:
         '200':
           description: Updated
           content:
             application/json:
               schema: { $ref: '#/components/schemas/Task' }
+              example: { id: "tsk_001", title: "buy milk", due: "2025-12-31", completed: true }
         '400':
           $ref: '#/components/responses/BadRequest'
         '404':
@@ -174,38 +173,28 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          examples:
-            malformedJson:
-              value: { error: "Malformed JSON" }
-            validation:
-              value: { error: "Invalid 'due' (expected YYYY-MM-DD)" }
+          example: { error: "Invalid 'due' (expected YYYY-MM-DD)" }
 
     UnsupportedMediaType:
       description: Content-Type must be application/json
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          examples:
-            wrongContentType:
-              value: { error: "Unsupported Media Type (use application/json)" }
+          example: { error: "Unsupported Media Type (use application/json)" }
 
     PayloadTooLarge:
       description: Payload too large (exceeds MAX_BODY_BYTES)
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          examples:
-            tooLarge:
-              value: { error: "Payload too large" }
+          example: { error: "Payload too large" }
 
     NotFound:
       description: Resource not found
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          examples:
-            missing:
-              value: { error: "Not found" }
+          example: { error: "Not found" }
 
     MethodNotAllowedCollection:
       description: Method not allowed on /tasks
@@ -215,9 +204,7 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          examples:
-            methodNotAllowed:
-              value: { error: "Method not allowed" }
+          example: { error: "Method not allowed" }
 
     MethodNotAllowedItem:
       description: Method not allowed on /tasks/{id}
@@ -227,15 +214,14 @@ components:
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
-          examples:
-            methodNotAllowed:
-              value: { error: "Method not allowed" }
+          example: { error: "Method not allowed" }
 
     ErrorDefault:
       description: Error
       content:
         application/json:
           schema: { $ref: '#/components/schemas/Error' }
+          example: { error: "Unexpected error" }
 
   schemas:
     Health:
