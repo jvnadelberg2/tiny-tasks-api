@@ -1,19 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <title>Tiny Tasks API Docs</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    body { margin: 0; padding: 0; }
-  </style>
-  <!-- Redoc standalone build -->
-  <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
-</head>
-<body>
-  <redoc spec-url="./openapi.yaml"></redoc>
-  <script>
-    Redoc.init('./openapi.yaml', {}, document.querySelector('redoc'));
-  </script>
-</body>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Tiny Tasks – Redoc</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+    <style> html,body,#redoc { height:100%; margin:0; } </style>
+  </head>
+  <body>
+    <redoc spec-url="/openapi.yaml"></redoc>
+  </body>
 </html>

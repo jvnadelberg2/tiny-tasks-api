@@ -1,52 +1,39 @@
 openapi: 3.0.3
 info:
   title: Tiny Tasks API
-  version: "1.0.0"
-  description: Minimal, dependency-free REST API for managing tasks.
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
+  version: 1.0.0
+  description: >
+    Minimal task API with strict JSON handling, CORS, and optional persistence (memory/JSON/SQLite).
+
 servers:
-  - url: http://localhost:3000
-    description: Local development server
-security: []
+  - url: /
+
 tags:
-  - name: Health
-    description: Health check endpoint
   - name: Tasks
-    description: CRUD operations for tasks
-  - name: Docs
-    description: API documentation endpoints
+  - name: CORS
+  - name: Health
 
 paths:
   /health:
     get:
       tags: [Health]
       summary: Health check
-      operationId: getHealth
       responses:
         '200':
           description: OK
           content:
             application/json:
-              schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: ok
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+              schema: { $ref: '#/components/schemas/Health' }
+              examples:
+                ok:
+                  value: { status: "ok" }
+        default:
+          $ref: '#/components/responses/ErrorDefault'
 
   /tasks:
     get:
       tags: [Tasks]
       summary: List tasks
-      operationId: listTasks
       responses:
         '200':
           description: Array of tasks
@@ -54,146 +41,268 @@ paths:
             application/json:
               schema:
                 type: array
-                items:
-                  $ref: '#/components/schemas/Task'
-        '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+                items: { $ref: '#/components/schemas/Task' }
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedCollection'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
     post:
       tags: [Tasks]
       summary: Create task
-      operationId: createTask
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/TaskInput'
+            schema: { $ref: '#/components/schemas/TaskCreate' }
             examples:
-              createExample:
-                value:
-                  title: demo task
-                  due: "2025-12-31"
-                  completed: false
+              ok:
+                value: { title: "buy milk", due: "2025-12-31", completed: false }
       responses:
         '201':
           description: Created
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
+              schema: { $ref: '#/components/schemas/Task' }
         '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
+        '413':
+          $ref: '#/components/responses/PayloadTooLarge'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedCollection'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+    options:
+      tags: [CORS]
+      summary: CORS preflight (collection)
+      responses:
+        '200':
+          description: OK (CORS headers present on response)
+        default:
+          $ref: '#/components/responses/ErrorDefault'
 
   /tasks/{id}:
     parameters:
-      - in: path
-        name: id
-        required: true
-        schema:
-          type: string
+      - $ref: '#/components/parameters/TaskId'
     get:
       tags: [Tasks]
-      summary: Get task by ID
-      operationId: getTaskById
+      summary: Get a task
       responses:
         '200':
           description: Task
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
+              schema: { $ref: '#/components/schemas/Task' }
         '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedItem'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
     put:
       tags: [Tasks]
-      summary: Update task
-      operationId: updateTask
+      summary: Update a task
+      description: Provide any subset of fields; at least one is required.
       requestBody:
         required: true
         content:
           application/json:
-            schema:
-              $ref: '#/components/schemas/TaskInput'
+            schema: { $ref: '#/components/schemas/TaskUpdate' }
+            examples:
+              setCompleted:
+                value: { completed: true }
       responses:
         '200':
           description: Updated
           content:
             application/json:
-              schema:
-                $ref: '#/components/schemas/Task'
+              schema: { $ref: '#/components/schemas/Task' }
         '400':
-          description: Bad request
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaType'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedItem'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
     delete:
       tags: [Tasks]
-      summary: Delete task
-      operationId: deleteTask
+      summary: Delete a task
       responses:
-        '204':
-          description: No Content
+        '204': { description: No Content }
         '404':
-          description: Not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowedItem'
+        default:
+          $ref: '#/components/responses/ErrorDefault'
+
+    options:
+      tags: [CORS]
+      summary: CORS preflight (item)
+      responses:
+        '200':
+          description: OK (CORS headers present on response)
+        default:
+          $ref: '#/components/responses/ErrorDefault'
 
 components:
+  parameters:
+    TaskId:
+      name: id
+      in: path
+      required: true
+      schema: { type: string }
+
+  headers:
+    Allow:
+      description: Comma-separated list of allowed methods for this resource.
+      schema:
+        type: string
+        example: GET, POST
+
+  responses:
+    BadRequest:
+      description: Validation error or malformed JSON
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            malformedJson:
+              value: { error: "Malformed JSON" }
+            validation:
+              value: { error: "Invalid 'due' (expected YYYY-MM-DD)" }
+
+    UnsupportedMediaType:
+      description: Content-Type must be application/json
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            wrongContentType:
+              value: { error: "Unsupported Media Type (use application/json)" }
+
+    PayloadTooLarge:
+      description: Payload too large (exceeds MAX_BODY_BYTES)
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            tooLarge:
+              value: { error: "Payload too large" }
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            missing:
+              value: { error: "Not found" }
+
+    MethodNotAllowedCollection:
+      description: Method not allowed on /tasks
+      headers:
+        Allow:
+          $ref: '#/components/headers/Allow'
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            methodNotAllowed:
+              value: { error: "Method not allowed" }
+
+    MethodNotAllowedItem:
+      description: Method not allowed on /tasks/{id}
+      headers:
+        Allow:
+          $ref: '#/components/headers/Allow'
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          examples:
+            methodNotAllowed:
+              value: { error: "Method not allowed" }
+
+    ErrorDefault:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+
   schemas:
+    Health:
+      type: object
+      additionalProperties: false
+      properties:
+        status:
+          type: string
+          example: ok
+      required: [status]
+
     Task:
       type: object
+      additionalProperties: false
+      properties:
+        id: { type: string }
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Non-empty; max length default 200 (configurable)
+        due:
+          type: string
+          format: date
+          description: YYYY-MM-DD
+        completed: { type: boolean }
       required: [id, title, due, completed]
-      properties:
-        id:
-          type: string
-          example: "1754922040132"
-        title:
-          type: string
-          example: "demo task"
-        due:
-          type: string
-          format: date
-          example: "2025-12-31"
-        completed:
-          type: boolean
-          example: false
 
-    TaskInput:
+    TaskCreate:
       type: object
-      required: [title, due]
+      additionalProperties: false
       properties:
         title:
           type: string
+          minLength: 1
+          maxLength: 200
+        due:
+          type: string
+          format: date
+          description: YYYY-MM-DD
+        completed:
+          type: boolean
+          description: Optional, defaults to false
+      required: [title, due]
+
+    TaskUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
         due:
           type: string
           format: date
         completed:
           type: boolean
+      description: At least one of title, due, or completed is required.
+      anyOf:
+        - required: [title]
+        - required: [due]
+        - required: [completed]
 
     Error:
       type: object
+      additionalProperties: false
       properties:
-        error:
-          type: string
-          example: Bad request
+        error: { type: string }
+      required: [error]
