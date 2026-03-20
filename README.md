@@ -1,3 +1,15 @@
+# Tiny Tasks API
+
+A Node.js REST API demonstrating API design, documentation, and developer usability.
+
+This repository is designed as a documentation-first API example, showing how clear structure and content improve developer experience.
+
+[![CI](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml)
+[![OpenAPI Lint](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml)
+[![Coverage](https://codecov.io/gh/jvnadelberg2/tiny-tasks-api/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jvnadelberg2/tiny-tasks-api)
+![Node](https://img.shields.io/badge/node-20.x-brightgreen?logo=node.js)
+[![License](https://img.shields.io/github/license/jvnadelberg2/tiny-tasks-api)](LICENSE)
+
 ## What this project demonstrates
 
 This project is designed to show how API documentation can:
@@ -5,16 +17,6 @@ This project is designed to show how API documentation can:
 - Provide clear integration guidance  
 - Structure content into concept, task, and reference sections  
 - Align documentation with real-world usage  
-
-# Tiny Tasks API
-
-A Node.js REST API demonstrating API design, documentation, and developer usability.
-
-[![CI](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml)
-[![OpenAPI Lint](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml)
-[![Coverage](https://codecov.io/gh/jvnadelberg2/tiny-tasks-api/branch/main/graph/badge.svg)](https://app.codecov.io/gh/jvnadelberg2/tiny-tasks-api)
-![Node](https://img.shields.io/badge/node-20.x-brightgreen?logo=node.js)
-[![License](https://img.shields.io/github/license/jvnadelberg2/tiny-tasks-api)](LICENSE)
 
 Minimal Node.js REST API for managing tiny tasks, using Node core modules only. Includes OpenAPI docs and a small docs set.
 
