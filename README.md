@@ -1,4 +1,14 @@
+## What this project demonstrates
+
+This project is designed to show how API documentation can:
+- Support developer onboarding  
+- Provide clear integration guidance  
+- Structure content into concept, task, and reference sections  
+- Align documentation with real-world usage  
+
 # Tiny Tasks API
+
+A Node.js REST API demonstrating API design, documentation, and developer usability.
 
 [![CI](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/ci.yml)
 [![OpenAPI Lint](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml/badge.svg?branch=main)](https://github.com/jvnadelberg2/tiny-tasks-api/actions/workflows/openapi-lint.yml)
